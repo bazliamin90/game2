@@ -1,0 +1,37 @@
+[
+    {
+        "hint": "Buku",
+        "sentence": "book",
+        "image": "book.svg"
+    },
+    {
+        "hint": "Pembaris",
+        "sentence": "ruler",
+        "image": "ruler.svg"
+    },
+    {
+        "hint": "Pemadam",
+        "sentence": "eraser",
+        "image": "eraser.svg"
+    },
+    {
+        "hint": "Meja",
+        "sentence": "table",
+        "image": "table.svg"
+    },
+    {
+        "hint": "Kerusi",
+        "sentence": "chair",
+        "image": "chair.svg"
+    },
+    {
+        "hint": "Pensel",
+        "sentence": "pencil",
+        "image": "pencil.svg"
+    },
+    {
+        "hint": "Cawan",
+        "sentence": "cup",
+        "image": "cup.svg"
+    }
+]

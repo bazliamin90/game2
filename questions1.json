@@ -1,0 +1,26 @@
+[
+    {
+        "hint": "Tambah",
+        "sentence": "add"
+    },
+    {
+        "hint": "Tolak",
+        "sentence": "subtract"
+    },
+    {
+        "hint": "Bahagi",
+        "sentence": "divide"
+    },
+    {
+        "hint": "Darab",
+        "sentence": "multiply"
+    },
+    {
+        "hint": "Kurang",
+        "sentence": "less"
+    },
+    {
+        "hint": "Lebih",
+        "sentence": "more"
+    }
+]

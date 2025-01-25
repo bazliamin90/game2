@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="header.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <title>Teka kata</title>
+</head>
+<body>
+<header3-component></header3-component>
+
+<div class="game-container">
+<h3>Teka Kata: Ayat</h3>
+<ol id="questions-list"></ol>
+<button class="retry" onclick="retry()">Refresh</button>
+</div>
+
+<script>
+    let questions = [];
+
+    async function loadQuestions() {
+        const response = await fetch("questions3.json");
+        questions = await response.json();
+
+        const listContainer = document.getElementById("questions-list");
+        listContainer.innerHTML = ""; // Clear the list before populating
+
+        questions.forEach((question, index) => {
+            const listItem = document.createElement("li");
+
+            // Create hint and blanks container
+            const hintDiv = document.createElement("div");
+            hintDiv.classList.add("hint");
+            hintDiv.textContent = question.hint;
+
+            const blanksDiv = document.createElement("div");
+            blanksDiv.classList.add("blanks");
+            blanksDiv.id = `blanks${index + 1}`;
+
+            const feedbackDiv = document.createElement("div");
+            feedbackDiv.classList.add("feedback");
+            feedbackDiv.id = `feedback${index + 1}`;
+
+            // Add elements to the list item
+            listItem.appendChild(hintDiv);
+            listItem.appendChild(blanksDiv);
+            listItem.appendChild(feedbackDiv);
+
+            // Append the list item to the ordered list
+            listContainer.appendChild(listItem);
+
+            // Create blanks dynamically for the sentence
+            createBlanks(question.sentence, blanksDiv.id, feedbackDiv.id);
+        });
+    }
+
+    function getRevealedLetters(sentence) {
+        const words = sentence.split(" ");
+        const revealed = [];
+
+        let index = 0;
+        words.forEach(word => {
+            revealed.push(index); // First letter of the word
+            index += word.length + 1; // Move to the next word (+1 for the space)
+        });
+
+        // Reveal 6 additional random letters
+        const additionalReveals = Math.min(6, sentence.length - revealed.length);
+        for (let i = 0; i < additionalReveals; i++) {
+            let randomIndex;
+            do {
+                randomIndex = Math.floor(Math.random() * sentence.length);
+            } while (revealed.includes(randomIndex) || sentence[randomIndex] === " ");
+            revealed.push(randomIndex);
+        }
+
+        return revealed;
+    }
+
+    function createBlanks(sentence, containerId, feedbackId) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = ""; // Clear previous content
+
+        const revealedLetters = getRevealedLetters(sentence);
+        const words = sentence.split(" ");
+        let index = 0;
+        let inputs = [];
+
+        words.forEach(word => {
+            const wordDiv = document.createElement("div");
+            wordDiv.style.display = "flex";
+            wordDiv.style.gap = "2px";
+
+            for (let i = 0; i < word.length; i++) {
+                const letter = word[i];
+                const blank = document.createElement("div");
+                blank.classList.add("blank");
+
+                const input = document.createElement("input");
+                input.setAttribute("maxlength", "1");
+                input.dataset.correctLetter = letter;
+                input.disabled = revealedLetters.includes(index);
+                input.value = revealedLetters.includes(index) ? letter : "";
+                input.addEventListener("input", (event) => {
+                    checkAnswer(input, feedbackId);
+                    if (input.value && event.inputType !== "deleteContentBackward" && input.value.toLowerCase() === input.dataset.correctLetter.toLowerCase()) {
+                        // Move to the next blank input
+                        let nextInput = inputs[inputs.indexOf(input) + 1];
+
+                        // Skip inputs that already have a letter filled
+                        while (nextInput && nextInput.value) {
+                            nextInput = inputs[inputs.indexOf(nextInput) + 1];
+                        }
+
+                        // Focus on the next available blank input
+                        if (nextInput) nextInput.focus();
+                    }
+                });
+
+                blank.appendChild(input);
+                wordDiv.appendChild(blank);
+                inputs.push(input);
+
+                index++;
+            }
+
+            index++; // Skip the space
+            container.appendChild(wordDiv);
+        });
+    }
+
+    function checkAnswer(input, feedbackId) {
+        const feedback = document.getElementById(feedbackId);
+        const parent = input.parentElement;
+        if (input.value.toLowerCase() === input.dataset.correctLetter.toLowerCase()) {
+            parent.classList.add("correct");
+            parent.classList.remove("incorrect");
+            input.disabled = true;
+        } else {
+            parent.classList.add("incorrect");
+            parent.classList.remove("correct");
+        }
+
+        if (isComplete(feedbackId)) {
+            feedback.textContent = "Betul! ✅";
+        } else {
+            feedback.textContent = "";
+        }
+    }
+
+    function isComplete(feedbackId) {
+        const feedback = document.getElementById(feedbackId);
+        const blanks = feedback.previousElementSibling.querySelectorAll("input");
+        return Array.from(blanks).every(input => input.disabled);
+    }
+
+    function retry() {
+        loadQuestions();
+    }
+
+    // Load questions on page load
+    loadQuestions();
+</script>
+
+</body>
+</html>

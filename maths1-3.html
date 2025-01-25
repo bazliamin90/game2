@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="header.js"></script>
+  <script src="mathsnav1.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="maths.css">
+  <title>Addition 3</title>
+</head>
+<body>
+  <header3-component></header3-component>
+  
+  <div class="game-container">
+    <header2-component></header2-component>
+  </div>
+
+  <h3>Addition 3</h3>
+  <div id="questions-container"></div>
+  <button id="reset-button">Reset Questions</button>
+
+  <script>
+    // Function to generate random numbers
+    function generateRandomNumber(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // Function to split a number into digits and align to place value
+    function splitNumberIntoDigits(number, maxLength) {
+      const digits = String(number).split("").map(Number);
+      const padding = Array(maxLength - digits.length).fill("");
+
+      return padding.concat(digits); // Add padding to align digits to the right
+    }
+
+    // Function to generate a single math question
+    function generateQuestion() {
+      let num1, missing, answer;
+      do {
+        num1 = generateRandomNumber(1, 999);
+        answer = generateRandomNumber(num1 + 1, 999); // Ensure answer > num1
+        missing = answer - num1; // Calculate the missing number
+      } while (missing < 1 || answer > 999); // Ensure valid missing numbers
+
+      return { num1, missing, answer };
+    }
+
+    // Function to create a table for a math question
+    function createTable(question) {
+      const maxDigits = 3; // Maximum of 3 digits for alignment
+      const num1Digits = splitNumberIntoDigits(question.num1, maxDigits);
+      const missingDigits = Array(maxDigits).fill(""); // Placeholder for missing digits
+      const answerDigits = splitNumberIntoDigits(question.answer, maxDigits);
+
+      const table = document.createElement("table");
+
+      // First row: number 1 digits
+      let row1 = "<tr><td class='borderless'></td>";
+      num1Digits.forEach(digit => {
+        row1 += `<td>${digit}</td>`;
+      });
+      row1 += "</tr>";
+
+      // Second row: operator and missing number blanks
+      let row2 = "<tr><td class='borderless'>+</td>";
+      missingDigits.forEach((_, i) => {
+        row2 += `<td>
+                   <input type="text" maxlength="1" class="answer-input" data-index="${i}" placeholder=" ">
+                 </td>`;
+      });
+      row2 += "</tr>";
+
+      // Third row: equals sign and answer digits
+      let row3 = "<tr><td class='borderless'></td>";
+      answerDigits.forEach(digit => {
+        row3 += `<td>${digit}</td>`;
+      });
+      row3 += `<td class="feedback"></td></tr>`; // Feedback cell in the last column
+
+      table.innerHTML = row1 + row2 + row3;
+
+      // Add validation logic for the answer
+      const inputs = table.querySelectorAll(".answer-input");
+      const feedbackCell = table.querySelector(".feedback");
+
+      inputs.forEach((input, index) => {
+        input.addEventListener("input", () => {
+          const userAnswer = Array.from(inputs)
+            .map(input => input.value)
+            .join("");
+
+          if (parseInt(userAnswer) === question.missing) {
+            inputs.forEach(input => {
+              input.classList.remove("wrong");
+              input.classList.add("correct");
+              input.disabled = true; // Disable inputs after correct answer
+            });
+            feedbackCell.textContent = "✓"; // Add tick
+            feedbackCell.style.color = "green";
+          } else if (userAnswer.length === String(question.missing).length) {
+            inputs.forEach(input => {
+              input.classList.remove("correct");
+              input.classList.add("wrong");
+            });
+            feedbackCell.textContent = "✗"; // Add cross
+            feedbackCell.style.color = "red";
+          } else {
+            inputs.forEach(input => input.classList.remove("correct", "wrong"));
+            feedbackCell.textContent = ""; // Clear feedback
+          }
+        });
+
+        // Prevent non-numeric input
+        input.addEventListener("keydown", (e) => {
+          if (!/[0-9]/.test(e.key) && e.key !== "Backspace") {
+            e.preventDefault();
+          }
+        });
+      });
+
+      return table;
+    }
+
+    // Function to generate all questions
+    function generateQuestions() {
+      const container = document.getElementById("questions-container");
+      container.innerHTML = ""; // Clear existing questions
+
+      for (let i = 0; i < 5; i++) {
+        const question = generateQuestion();
+        const table = createTable(question);
+        container.appendChild(table);
+      }
+    }
+
+    // Event listener for reset button
+    document.getElementById("reset-button").addEventListener("click", generateQuestions);
+
+    // Generate questions on page load
+    window.onload = generateQuestions;
+  </script>
+</body>
+</html>

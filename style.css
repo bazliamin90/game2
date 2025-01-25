@@ -1,0 +1,130 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0 auto;
+    overflow-y: scroll;
+}
+nav ol {
+    display: flex;
+    flex-wrap: wrap; /* Allows wrapping to a new line if space is limited */
+    justify-content: flex-start; /* Align items to the left */
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+nav ol li {
+    font-size: 1em;
+    margin: 5px;
+}
+nav ol li a {
+    text-decoration: none;
+    text-underline-offset: 3px;
+    color: red;
+    background-color: #f9f9f9;
+    border: 1px solid purple;
+    border-radius: 5px;
+    padding: 5px 10px;
+}
+.mainbullet li{
+    padding: 10px 0;
+}
+h3 {
+    text-align: center;
+}
+p {
+    font-size: 1em;
+    line-height: 1.5;
+    color: gray;
+}
+.about {
+    width: 25%;
+    height: auto;
+    border-radius: 5px;
+}
+img {
+    width: 15%;
+    height: auto;
+    margin: 0 auto;
+    display: flex;
+}
+.game-container {
+    max-width: 400px;
+    margin: 30px auto;
+    padding: 10px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+#questions-list {
+    font-size: 0.9em;
+    padding: 0 20px;
+    color: gray;
+}
+#questions-list > li {
+    margin-bottom: 30px;
+}
+.question {
+    margin-bottom: 30px;
+}
+.hint {
+    color: gray;
+    font-size: 1em;
+    margin-bottom: 10px;
+}
+.blanks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 10px;
+    justify-content: center;
+}
+.blank {
+    width: 20px;
+    height: 25px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    line-height: 25px;
+    margin: 0 auto;
+    display: flex;
+}
+.blank input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    text-align: center;
+    font-size: 15px;
+    background: none;
+    outline: none;
+}
+.correct {
+    background-color: #c8e6c9;
+    border-color: #388e3c;
+}
+.incorrect {
+    background-color: #ffcdd2;
+    border-color: #d32f2f;
+}
+.feedback {
+    font-size: 0.9em;
+    margin-top: 10px;
+}
+.retry {
+    margin-top: 20px;
+    text-align: center;
+}
+@media screen and (max-width: 500px) {
+    .blank input {
+    font-size: 12px;
+    }
+    .game-container {
+        max-width: 85%;
+    }
+    nav {
+        margin: 0 auto;
+    }
+    nav ol {
+        line-height: 0.2;
+    }
+    nav ol li {
+        font-size: 12px;
+    }
+}

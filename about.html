@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script src="header.js"></script>
+    <title>Teka Kata</title>
+</head>
+<body>
+    <header3-component></header3-component>
+    <div class="game-container">
+        <h3>Assalamualaikum</h3>
+        <p>
+            Untuk anak-anak walid dan semua yang berkunjung, 
+            walid buat game ini untuk kamu belajar. 
+            Mudah-mudahan semua jadi orang berjaya 
+            di dunia dan akhirat, insyaAllah.
+        </p>
+        <img src="https://github.com/bazliamin90/img/blob/main/1000272896 (1).jpg?raw=true" class="about">
+    </div>    
+        
+    <script>
+        const words = [
+            { word: "addition", hint: "Tambahan", id: "wordDisplay1", iconId: "icon1" },
+            { word: "division", hint: "Bahagi", id: "wordDisplay2", iconId: "icon2" },
+            { word: "multiply", hint: "Darab", id: "wordDisplay3", iconId: "icon3" },
+            { word: "more", hint: "Lebih", id: "wordDisplay4", iconId: "icon4" },
+            { word: "less", hint: "Kurang", id: "wordDisplay5", iconId: "icon5" }
+        ];
+
+        function generateRevealedWord(word) {
+            const wordArray = Array.from(word);
+            const revealedIndexes = [];
+            const numRevealed = Math.floor(Math.random() * 3) + 1; // Reveal 1-3 letters
+
+            while (revealedIndexes.length < numRevealed) {
+                const randomIndex = Math.floor(Math.random() * wordArray.length);
+                if (!revealedIndexes.includes(randomIndex)) {
+                    revealedIndexes.push(randomIndex);
+                }
+            }
+
+            return wordArray.map((letter, index) =>
+                revealedIndexes.includes(index) ? letter : "_"
+            );
+        }
+
+        function renderWordDisplay() {
+            words.forEach(({ word, id, iconId }) => {
+                const wordDisplay = document.getElementById(id);
+                const icon = document.getElementById(iconId);
+                const revealedWord = generateRevealedWord(word);
+
+                revealedWord.forEach((char, index) => {
+                    const input = document.createElement("input");
+                    input.type = "text";
+                    input.maxLength = 1;
+                    input.classList.add("letter-input");
+
+                    if (char !== "_") {
+                        input.value = char.toUpperCase();
+                        input.disabled = true;
+                    } else {
+                        input.dataset.index = index;
+                        input.dataset.word = word;
+                        input.dataset.id = id;
+                        input.dataset.iconId = iconId;
+                        input.addEventListener("input", handleInput);
+                    }
+
+                    wordDisplay.insertBefore(input, icon);
+                });
+            });
+        }
+
+        function handleInput(event) {
+            const currentInput = event.target;
+            const { word, id, iconId } = currentInput.dataset;
+            const inputs = document.querySelectorAll(`#${id} .letter-input`);
+            const icon = document.getElementById(iconId);
+
+            // Automatically move to the next input
+            const nextInput = currentInput.nextElementSibling;
+            if (currentInput.value && nextInput && nextInput.tagName === "INPUT" && !nextInput.disabled) {
+                nextInput.focus();
+            }
+
+            // Check if all blanks are filled
+            let userGuess = "";
+            let allFilled = true;
+
+            inputs.forEach(input => {
+                if (!input.value) allFilled = false;
+                userGuess += input.value.toLowerCase();
+            });
+
+            if (allFilled) {
+                if (userGuess === word) {
+                    inputs.forEach(input => {
+                        input.classList.add("correct");
+                        input.classList.remove("incorrect");
+                        input.disabled = true;
+                    });
+                    icon.textContent = "✔️";
+                    icon.classList.add("correct");
+                    icon.classList.remove("incorrect");
+                    icon.style.visibility = "visible";
+                } else {
+                    inputs.forEach(input => {
+                        input.classList.add("incorrect");
+                        input.classList.remove("correct");
+                    });
+                    icon.textContent = "❌";
+                    icon.classList.add("incorrect");
+                    icon.classList.remove("correct");
+                    icon.style.visibility = "visible";
+                }
+            } else {
+                // Reset styles if not fully filled
+                inputs.forEach(input => {
+                    input.classList.remove("correct", "incorrect");
+                });
+                icon.style.visibility = "hidden";
+            }
+        }
+
+        // Render the word displays on page load
+        renderWordDisplay();
+    </script>
+</body>
+</html>

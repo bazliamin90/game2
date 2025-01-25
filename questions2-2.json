@@ -1,0 +1,17 @@
+[
+    {
+        "hint": "Almari",
+        "sentence": "cupboard",
+        "image": "cupboard.svg"
+    },
+    {
+        "hint": "Televisyen",
+        "sentence": "television",
+        "image": "television.svg"
+    },
+    {
+        "hint": "Almari pakaian",
+        "sentence": "wardrobe",
+        "image": "wardrobe.svg"
+    }
+]

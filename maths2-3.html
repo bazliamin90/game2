@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="header.js"></script>
+  <script src="mathsnav2.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="maths.css">
+  <title>Subtraction 3</title>
+</head>
+<body>
+  <header3-component></header3-component>
+  
+  <div class="game-container">
+    <header2-component></header2-component>
+  </div>
+  
+  <h3>Subtraction 3</h3>
+  <div id="questions-container"></div>
+  <button id="reset-button">Reset Questions</button>
+
+  <script>
+    // Function to generate random numbers
+    function generateRandomNumber(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // Function to split a number into digits and align to place value
+    function splitNumberIntoDigits(number, maxLength) {
+      const digits = String(number).split("").map(Number);
+      const padding = Array(maxLength - digits.length).fill("");
+
+      // Only keep meaningful zeroes, no leading zeroes allowed
+      const alignedDigits = padding.concat(digits);
+      for (let i = 0; i < alignedDigits.length; i++) {
+        if (alignedDigits[i] === 0 || alignedDigits[i] === "") {
+          alignedDigits[i] = ""; // Remove unnecessary zero padding
+        } else {
+          break; // Stop once a meaningful digit is found
+        }
+      }
+
+      return alignedDigits;
+    }
+
+    // Function to generate a single math question with missing digits
+    function generateQuestion() {
+      let num1, num2, answer;
+      do {
+        answer = generateRandomNumber(0, 999); // The correct answer (must be within the range)
+        num1 = generateRandomNumber(answer, 999); // First number should be larger than the answer
+        num2 = num1 - answer; // Second number (num2) is derived from num1 and answer
+      } while (num2 > 999); // Ensure num2 is within a 3-digit limit
+
+      return { num1, num2, answer };
+    }
+
+    // Function to create a table for a math question
+    function createTable(question) {
+      const maxDigits = 3; // Maximum of 3 digits for alignment
+      const num1Digits = splitNumberIntoDigits(question.num1, maxDigits);
+      const num2Digits = splitNumberIntoDigits(question.num2, maxDigits);
+      const answerDigits = splitNumberIntoDigits(question.answer, maxDigits);
+
+      const table = document.createElement("table");
+
+      // First row: num1 digits (for the first number)
+      let row1 = "<tr><td class='borderless'></td>";
+      num1Digits.forEach(digit => {
+        row1 += `<td>${digit}</td>`;
+      });
+      row1 += "</tr>";
+
+      // Second row: minus sign and xxx digits (missing digits to fill in)
+      let row2 = "<tr><td class='borderless'>−</td>";
+      num2Digits.forEach(digit => {
+        row2 += `<td>
+                   <input type="text" maxlength="1" class="answer-input" placeholder=" ">
+                 </td>`;
+      });
+      row2 += "</tr>";
+
+      // Third row: the equal sign and answer digits
+      let row3 = "<tr><td class='borderless'></td>";
+      answerDigits.forEach(digit => {
+        row3 += `<td>${digit}</td>`;
+      });
+      row3 += "<td class='feedback'></td></tr>"; // Feedback cell
+
+      table.innerHTML = row1 + row2 + row3;
+
+      // Add validation logic for answer
+      const inputs = table.querySelectorAll(".answer-input");
+      const feedbackCell = table.querySelector(".feedback");
+
+      inputs.forEach((input, index) => {
+        input.addEventListener("input", () => {
+          const userAnswer = Array.from(inputs)
+            .map(input => input.value)
+            .join("");
+
+          if (parseInt(userAnswer) === question.num2) {
+            inputs.forEach(input => {
+              input.classList.remove("wrong");
+              input.classList.add("correct");
+              input.disabled = true; // Disable inputs after correct answer
+            });
+            feedbackCell.textContent = "✓"; // Add tick
+            feedbackCell.style.color = "green";
+          } else if (userAnswer.length === String(question.num2).length) {
+            inputs.forEach(input => {
+              input.classList.remove("correct");
+              input.classList.add("wrong");
+            });
+            feedbackCell.textContent = "✗"; // Add cross
+            feedbackCell.style.color = "red";
+          } else {
+            inputs.forEach(input => input.classList.remove("correct", "wrong"));
+            feedbackCell.textContent = ""; // Clear feedback
+          }
+        });
+
+        // Prevent non-numeric input
+        input.addEventListener("keydown", (e) => {
+          if (!/[0-9]/.test(e.key) && e.key !== "Backspace") {
+            e.preventDefault();
+          }
+        });
+      });
+
+      return table;
+    }
+
+    // Function to generate all questions
+    function generateQuestions() {
+      const container = document.getElementById("questions-container");
+      container.innerHTML = ""; // Clear existing questions
+
+      for (let i = 0; i < 5; i++) {
+        const question = generateQuestion();
+        const table = createTable(question);
+        container.appendChild(table);
+      }
+    }
+
+    // Event listener for reset button
+    document.getElementById("reset-button").addEventListener("click", generateQuestions);
+
+    // Generate questions on page load
+    window.onload = generateQuestions;
+  </script>
+</body>
+</html>

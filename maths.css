@@ -1,0 +1,46 @@
+table {
+    width: auto;
+    margin: 20px auto;
+    border-collapse: collapse;
+  }
+  td {
+    border: 1px solid black;
+    padding: 10px;
+    text-align: center;
+    width: 30px;
+  }
+  .borderless {
+    border: none;
+  }
+  input {
+    width: 30px;
+    text-align: center;
+    border: 1px solid black;
+  }
+  input.correct {
+    background-color: lightgreen;
+  }
+  input.wrong {
+    background-color: lightcoral;
+  }
+  h2 {
+    text-align: center;
+  }
+  .feedback {
+    font-size: 18px;
+    margin-left: 10px;
+  }
+  #reset-button {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  #reset-button:hover {
+    background-color: #0056b3;
+  }
