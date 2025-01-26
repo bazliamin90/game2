@@ -22,5 +22,17 @@
     {
         "hint": "Lebih",
         "sentence": "more"
+    },
+    {
+        "hint": "Susun",
+        "sentence": "arrange"
+    },
+    {
+        "hint": "Menaik",
+        "sentence": "ascending"
+    },
+    {
+        "hint": "Menurun",
+        "sentence": "descending"
     }
 ]

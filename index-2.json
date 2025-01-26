@@ -1,0 +1,42 @@
+[
+    {
+        "hint": "Recognise",
+        "sentence": "kenalpasti"
+    },
+    {
+        "hint": "316",
+        "sentence": "three hundred and sixteen"
+    },
+    {
+        "hint": "705",
+        "sentence": "seven hundred and five"
+    },
+    {
+        "hint": "490",
+        "sentence": "four hundred and ninety"
+    },
+    {
+        "hint": "In the number 318, what is the digit value of 3?",
+        "sentence": "300"
+    },
+    {
+        "hint": "In the number 418, what is the digit value of 4?",
+        "sentence": "400"
+    },
+    {
+        "hint": "In the number 153, what is the place value of 1?",
+        "sentence": "hundreds"
+    },
+    {
+        "hint": "In the number 153, what is the place value of 5?",
+        "sentence": "tens"
+    },
+    {
+        "hint": "In the number 250, what is the place value of 0?",
+        "sentence": "ones"
+    },
+    {
+        "hint": "Estimation",
+        "sentence": "anggaran"
+    }
+]
