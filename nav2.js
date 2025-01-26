@@ -40,7 +40,7 @@ headerTemplate2.innerHTML = `
 </style>
   <nav>
     <ol class="mainbullet">
-      <li><a href="index2.html">1</a></li>
+      <li><a href="index2-1.html">1</a></li>
       <li><a href="index2-2.html">2</a></li>
     </ol>
   </nav>
