@@ -165,6 +165,7 @@ ol li {
   <hr><b>Maths</b>
     <li><a href="maths1-1.html">Tambah</a></li>
     <li><a href="maths2-1.html">Tolak</a></li>
+    <li><a href="jam.html">Teka Jam</a></li>
   </ol>
 <br><br>
 </div>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="header.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <title>Clock with Time Quiz</title>
+  <style>
+    .circle {
+      display: flex;
+      margin: 20px auto;
+      position: relative;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      border: 2px solid blue;
+      background: #fff;
+    }
+
+    .number {
+      position: absolute;
+      font-size: 1.2rem;
+      font-weight: bold;
+      transform: translate(-50%, -50%);
+    }
+
+    .hand {
+      position: absolute;
+      width: 2px;
+      background: #333;
+      transform-origin: 50% 100%;
+      transform: translate(-50%, -100%);
+      border-radius: 2px;
+      top: 50%;
+      left: 50%;
+      transition: transform 0.5s ease-in-out;
+    }
+
+    .hour-hand {
+      height: 60px;
+      width: 5px;
+      background: blue;
+    }
+
+    .minute-hand {
+      height: 100px;
+      background: #666;
+    }
+
+    .time-inputs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .time-inputs input {
+      width: 50px;
+      text-align: center;
+      font-size: 1rem;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    #hour-input {
+      border: 2px solid blue;
+    }
+
+    #minute-input {
+      border: 2px solid #666;
+    }
+
+    .correct {
+      margin: 20px auto;
+      justify-content: center;
+      font-size: 0.9rem;
+      color: black;
+      display: none;
+    }
+
+    .reset-btn {
+      display: flex;
+      margin: 20px auto;
+      padding: 5px 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      background-color: #f44336;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+    }
+
+    .reset-btn:hover {
+      background-color: #e53935;
+    }
+
+    .game-container2 {
+        max-width: 400px;
+        margin: 30px auto;
+        padding: 10px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    @media screen and (max-width: 500px) {
+    .circle {
+      scale: 0.8;
+      margin: 0 auto;
+    }
+    .time-inputs input{
+      font-size: 0.8rem;
+    }
+    .reset-btn, .correct {
+      margin: 10px auto;
+      font-size: 0.8rem;
+    }
+    }
+  </style>
+</head>
+<body>
+<header3-component></header3-component>
+  <div class="game-container2">
+  <h3>Teka Jam</h3>
+  <div class="circle" id="circle">
+    <!-- Hands -->
+    <div class="hand hour-hand" id="hour-hand"></div>
+    <div class="hand minute-hand" id="minute-hand"></div>
+  </div>
+
+  <div class="time-inputs">
+    <input type="text" id="hour-input" placeholder="Hour" maxlength="2">
+    <span>:</span>
+    <input type="text" id="minute-input" placeholder="Minute" maxlength="2">
+  </div>
+
+  <div class="correct" id="correct-message">Jawapan betul, alhamdulillah!</div>
+
+  <button class="reset-btn" id="reset-btn">Reset</button>
+  </div>
+  <script>
+    const hourHand = document.getElementById('hour-hand');
+    const minuteHand = document.getElementById('minute-hand');
+    const hourInput = document.getElementById('hour-input');
+    const minuteInput = document.getElementById('minute-input');
+    const correctMessage = document.getElementById('correct-message');
+    const resetButton = document.getElementById('reset-btn');
+    const radius = 150;
+
+    let correctTime = { hour: 0, minute: 0 };
+
+    // Create the numbers on the clock
+    for (let i = 1; i <= 12; i++) {
+      const angle = ((i - 3) * 30) * (Math.PI / 180);
+      const x = radius + (radius - 20) * Math.cos(angle);
+      const y = radius + (radius - 20) * Math.sin(angle);
+
+      const number = document.createElement('div');
+      number.className = 'number';
+      number.style.left = `${x}px`;
+      number.style.top = `${y}px`;
+      number.textContent = i;
+
+      document.getElementById('circle').appendChild(number);
+    }
+
+    // Function to set a random time
+    function setRandomTime() {
+      // Generate a random time (hour: 1-12, minute: 0-59)
+      const hour = Math.floor(Math.random() * 12) + 1;
+      const minute = Math.floor(Math.random() * 60);
+
+      correctTime = { hour, minute };
+
+      // Set hour hand (360° for 12 hours, 30° per hour)
+      const hourAngle = (hour % 12) * 30 + (minute / 60) * 30;
+      hourHand.style.transform = `translate(-50%, -100%) rotate(${hourAngle}deg)`;
+
+      // Set minute hand (360° for 60 minutes, 6° per minute)
+      const minuteAngle = minute * 6;
+      minuteHand.style.transform = `translate(-50%, -100%) rotate(${minuteAngle}deg)`;
+    }
+
+    // Function to check the user's input
+    function checkTime() {
+      const userHour = parseInt(hourInput.value, 10);
+      const userMinute = parseInt(minuteInput.value, 10);
+
+      if (
+        userHour === correctTime.hour &&
+        userMinute === correctTime.minute
+      ) {
+        hourInput.style.backgroundColor = "#f0daff"; 
+        minuteInput.style.backgroundColor = "#f0daff";
+        correctMessage.style.display = 'flex'; // Show "Correct!"
+        
+        // Disable inputs after correct answer
+        hourInput.disabled = true;
+        minuteInput.disabled = true;
+      } else {
+        hourInput.style.backgroundColor = "";
+        minuteInput.style.backgroundColor = "";
+        correctMessage.style.display = 'none';
+      }
+    }
+
+    // Set random time on page load
+    setRandomTime();
+
+    // Event listener to check the time when the user types
+    hourInput.addEventListener('input', checkTime);
+    minuteInput.addEventListener('input', checkTime);
+
+    // Reset button functionality
+    resetButton.addEventListener('click', () => {
+      // Reset the inputs and clock
+      hourInput.value = '';
+      minuteInput.value = '';
+      hourInput.disabled = false;
+      minuteInput.disabled = false;
+      hourInput.style.backgroundColor = '';
+      minuteInput.style.backgroundColor = '';
+      correctMessage.style.display = 'none';
+      
+      // Set a new random time for the clock
+      setRandomTime();
+    });
+  </script>
+</body>
+</html>
