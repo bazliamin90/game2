@@ -123,6 +123,10 @@ ol li {
     display: block;
     }
 	
+  .hrnone {
+    border: 1px solid #f9f9f9;
+  }
+
 	@media (max-width: 600px) {
 		.header {
 			border: none;
@@ -158,11 +162,12 @@ ol li {
   />
   <ol id="list">
     <li><a href="about.html">About</a></li>
-	<hr><b>Teka Kata</b>
+	<hr><b>Teka Kata</b><hr class="hrnone">
 	  <li><a href="index3-1.html">Ayat</a></li>
     <li><a href="index2-1.html">Benda</a></li>
     <li><a href="index.html">Maths</a></li>
-  <hr><b>Maths</b>
+    <li><a href="random1.html">Random</a></li>
+  <hr><b>Maths</b><hr class="hrnone">
     <li><a href="maths1-1.html">Tambah</a></li>
     <li><a href="maths2-1.html">Tolak</a></li>
     <li><a href="jam.html">Teka Jam</a></li>

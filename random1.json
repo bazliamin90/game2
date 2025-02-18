@@ -1,0 +1,17 @@
+[
+    {
+        "hint": "Ayah",
+        "sentence": "dad",
+        "image": "dad.svg"
+    },
+    {
+        "hint": "Bakul sampah",
+        "sentence": "bin",
+        "image": "bin.svg"
+    },
+    {
+        "hint": "Peta",
+        "sentence": "map",
+        "image": "map.svg"
+    }
+]
