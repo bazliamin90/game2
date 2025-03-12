@@ -1,0 +1,48 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+.container {
+    display: inline-block;
+    text-align: left;
+    padding: 20px;
+}
+.input-box {
+    width: 20px;
+    text-align: center;
+    font-size: 14px;
+}
+label {
+    font-size: 14px;
+}
+.tick {
+    color: green;
+    font-size: 14px;
+    font-weight: bold;
+    display: none;
+}
+.cross {
+    color: red;
+    font-size: 14px;
+    font-weight: bold;
+    display: none;
+}
+#reset-button {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+#reset-button:hover {
+    background-color: #0056b3;
+}
+hr {
+    margin: 20px 0;
+    border: none;
+    border-top: 1px solid #ccc;
+}

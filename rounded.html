@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="header.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="rounded.css">
+    <title>Rounding</title>
+</head>
+<body>
+    <header3-component></header3-component>
+
+    <div class="container">
+        <h3>Rounding</h3>
+        
+        <div id="questions"></div>
+        
+        <button id="reset-button" onclick="generateQuestions()">Reset Questions</button>
+    </div>
+
+    <script>
+        function generateQuestions() {
+            const questionContainer = document.getElementById("questions");
+            questionContainer.innerHTML = "";
+            
+            for (let i = 1; i <= 3; i++) {
+                let randomNum = Math.floor(Math.random() * (949 - 101 + 1)) + 101;
+                let roundedTens = Math.round(randomNum / 10) * 10;
+                let roundedHundreds = Math.round(randomNum / 100) * 100;
+                
+                let questionHTML = `
+                    <p>Round <strong>${randomNum}</strong> to the nearest:</p>
+                    <label>tens: </label>
+                    <input type="text" class="input-box" maxlength="1" id="tens${i}1"> 
+                    <input type="text" class="input-box" maxlength="1" id="tens${i}2"> 
+                    <input type="text" class="input-box" maxlength="1" id="tens${i}3"> 
+                    <span class="tick" id="tickTens${i}">✔</span>
+                    <span class="cross" id="crossTens${i}">✘</span><br><br>
+                    <label>hundreds: </label>
+                    <input type="text" class="input-box" maxlength="1" id="hundreds${i}1"> 
+                    <input type="text" class="input-box" maxlength="1" id="hundreds${i}2"> 
+                    <input type="text" class="input-box" maxlength="1" id="hundreds${i}3"> 
+                    <span class="tick" id="tickHundreds${i}">✔</span>
+                    <span class="cross" id="crossHundreds${i}">✘</span><br><br>
+                `;
+                
+                questionContainer.innerHTML += questionHTML;
+                if (i < 3) {
+                    questionContainer.innerHTML += "<hr>";
+                }
+            }
+            
+            for (let i = 1; i <= 3; i++) {
+                setupAutoCheck(`tens${i}`, i);
+                setupAutoCheck(`hundreds${i}`, i);
+            }
+        }
+
+        function setupAutoCheck(idPrefix, questionIndex) {
+            let inputs = [document.getElementById(idPrefix + "1"),
+                          document.getElementById(idPrefix + "2"),
+                          document.getElementById(idPrefix + "3")];
+            
+            inputs.forEach((input, index) => {
+                input.addEventListener("input", () => {
+                    if (input.value.length === 1 && index < 2) {
+                        inputs[index + 1].focus();
+                    }
+                    let allFilled = inputs.every(i => i.value.length === 1);
+                    if (allFilled) checkAnswer(idPrefix, questionIndex);
+                });
+            });
+        }
+
+        function checkAnswer(idPrefix, questionIndex) {
+            let correctValue = (idPrefix.includes("tens") ? 
+                Math.round(parseInt(document.querySelectorAll("strong")[questionIndex - 1].innerText) / 10) * 10 :
+                Math.round(parseInt(document.querySelectorAll("strong")[questionIndex - 1].innerText) / 100) * 100
+            ).toString();
+
+            let answer = document.getElementById(idPrefix + "1").value +
+                         document.getElementById(idPrefix + "2").value +
+                         document.getElementById(idPrefix + "3").value;
+            let inputs = [document.getElementById(idPrefix + "1"),
+                          document.getElementById(idPrefix + "2"),
+                          document.getElementById(idPrefix + "3")];
+
+            let tickId = "tick" + idPrefix.charAt(0).toUpperCase() + idPrefix.slice(1);
+            let crossId = "cross" + idPrefix.charAt(0).toUpperCase() + idPrefix.slice(1);
+
+            if (answer === correctValue) {
+                document.getElementById(tickId).style.display = "inline";
+                document.getElementById(crossId).style.display = "none";
+                inputs.forEach(input => input.style.backgroundColor = "lightgreen");
+            } else {
+                document.getElementById(tickId).style.display = "none";
+                document.getElementById(crossId).style.display = "inline";
+                inputs.forEach(input => input.style.backgroundColor = "lightcoral");
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", generateQuestions);
+    </script>
+</body>
+</html>
