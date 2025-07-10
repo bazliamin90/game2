@@ -162,7 +162,9 @@ ol li {
   />
   <ol id="list">
     <li><a href="about.html">About</a></li>
-	<hr><b>Teka Kata</b><hr class="hrnone">
+	<hr><b>Agama</b><hr class="hrnone">
+	  <li><a href="agama.html">Baca alquran</a></li>
+  <hr><b>Teka Kata</b><hr class="hrnone">
 	  <li><a href="index3-1.html">Ayat</a></li>
     <li><a href="index2-1.html">Benda</a></li>
     <li><a href="index.html">Maths</a></li>
