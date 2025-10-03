@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="header.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <title>Vocab</title>
+  <link href="https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/gridjs/dist/gridjs.umd.js"></script>
+</head>
+<body>
+    <header3-component></header3-component>
+
+<div class="game-container">
+    <h3 style="text-align:center;">Vocab</h3>
+  <div style="text-align:center; margin-bottom: 10px;">
+    <button id="randomBtn">Random</button>
+    <button id="resetBtn">Reset</button>
+  </div>
+
+  <div id="loading">Loading data...</div>
+  <div id="grid"></div>
+</div>
+  <script>
+    const sheetUrl = "https://script.google.com/macros/s/AKfycbwH-AFyG33Hfgw-2-fX0LSXvVtHHwTlzDPj-YhlUSenDn8Xd-hUEbD5EXKkK6Te15Tj/exec";
+
+    let originalRows = [];
+    let headers = [];
+    let grid; // store Grid.js instance
+
+    function renderTable(rows, withPagination = true) {
+      if (grid) grid.destroy(); // clear old table
+
+      grid = new gridjs.Grid({
+        columns: headers,
+        data: rows,
+        search: withPagination,
+        sort: withPagination,
+        pagination: withPagination ? { enabled: true, limit: 10 } : false,
+        language: {
+          search: { placeholder: 'Cari sesuatu...' }
+        }
+      }).render(document.getElementById('grid'));
+    }
+
+    fetch(sheetUrl)
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('loading').style.display = 'none';
+
+        if (!data.length) {
+          document.getElementById('loading').textContent = 'No data available.';
+          return;
+        }
+
+        headers = Object.keys(data[0]);
+        originalRows = data.map(row => Object.values(row));
+
+        // 🔑 Sort alphabetically by first column (index 0)
+        originalRows.sort((a, b) => {
+          const valA = String(a[0] || "").toLowerCase();
+          const valB = String(b[0] || "").toLowerCase();
+          return valA.localeCompare(valB);
+        });
+
+        // initial render (sorted)
+        renderTable(originalRows, true);
+      })
+      .catch(err => {
+        console.error('Error fetching data:', err);
+        document.getElementById('loading').textContent = 'Failed to load data.';
+      });
+
+    // Random button
+    document.getElementById('randomBtn').addEventListener('click', () => {
+      if (!originalRows.length) return;
+
+      // Shuffle array
+      const shuffled = [...originalRows].sort(() => 0.5 - Math.random());
+      const random10 = shuffled.slice(0, 10);
+
+      renderTable(random10, false); // no pagination/search for random view
+    });
+
+    // Reset button
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      if (!originalRows.length) return;
+      renderTable(originalRows, true); // restore sorted original dataset
+    });
+  </script>
+</body>
+</html>
