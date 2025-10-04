@@ -8,6 +8,38 @@
   <title>Vocab</title>
   <link href="https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/gridjs/dist/gridjs.umd.js"></script>
+  <style>
+    /* ✅ Darker header row */
+    .gridjs-thead .gridjs-th {
+      background-color: #004466 !important;
+      color: #ffffff !important;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    /* ✅ Alternating row colors */
+    .gridjs-tbody .gridjs-tr:nth-child(odd) .gridjs-td {
+      background-color: #ffffff !important; /* white */
+    }
+    .gridjs-tbody .gridjs-tr:nth-child(even) .gridjs-td {
+      background-color: #e6f3ff !important; /* light blue */
+    }
+
+    /* ✅ Button styling */
+    #randomBtn, #resetBtn {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      margin: 4px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    #randomBtn:hover, #resetBtn:hover {
+      background-color: #45a049;
+    }
+</style>
 </head>
 <body>
     <header3-component></header3-component>
@@ -15,11 +47,11 @@
 <div class="game-container">
     <h3 style="text-align:center;">Vocab</h3>
   <div style="text-align:center; margin-bottom: 10px;">
-    <button id="randomBtn">Random</button>
+    <button id="randomBtn">Rawak 10</button>
     <button id="resetBtn">Reset</button>
   </div>
 
-  <div id="loading">Loading data...</div>
+  <div id="loading">Sedang memuat naik data...</div>
   <div id="grid"></div>
 </div>
   <script>
@@ -35,11 +67,11 @@
       grid = new gridjs.Grid({
         columns: headers,
         data: rows,
-        search: withPagination,
-        sort: withPagination,
+        search: withPagination ? { enabled: true } : false,
+        sort: true,
         pagination: withPagination ? { enabled: true, limit: 10 } : false,
         language: {
-          search: { placeholder: 'Cari sesuatu...' }
+          search: { placeholder: 'Cari perkataan...' }
         }
       }).render(document.getElementById('grid'));
     }

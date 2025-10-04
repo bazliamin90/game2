@@ -143,7 +143,7 @@ headerTemplate3.innerHTML = `
 
 <div class="header">
   <img src="menu.svg" class="menu" alt="Menu Icon"></img>
-  <h1><a href="index.html">Bazli's</a></h1>
+  <h1><a href="index.html">Bazli's Playschool</a></h1>
 </div>
 <div id="overlay"></div>
 <div class="scroll-box" id="scroll-box">
@@ -156,14 +156,15 @@ headerTemplate3.innerHTML = `
     aria-label="Search list items"
   />
   <ol id="list">
-    <li><a href="about.html">About</a></li>
+    <li><a href="index.html">About</a></li>
 	<hr><b>Agama</b><hr class="hrnone">
 	<li><a href="agama.html">Baca alquran</a></li>
+	<hr><b>Bahasa</b><hr class="hrnone">
 	<li><a href="0001.html">Vocab</a></li>
 	<hr><b>Teka Kata</b><hr class="hrnone">
 	<li><a href="index3-1.html">Ayat</a></li>
 	<li><a href="index2-1.html">Benda</a></li>
-	<li><a href="index.html">Maths</a></li>
+	<li><a href="indexb.html">Maths</a></li>
 	<li><a href="random1.html">Random</a></li>
 	<hr><b>Maths</b><hr class="hrnone">
 	<li><a href="maths1-1.html">Tambah</a></li>

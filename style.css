@@ -171,6 +171,7 @@ img {
     padding: 5px 10px;
     border-radius: 5px;
     }
+    
 @media screen and (max-width: 500px) {
     .blank input {
     font-size: 12px;
