@@ -86,7 +86,7 @@ headerTemplate3.innerHTML = `
 
 	.scroll-box ol {
 		font-family: monospace;
-		margin: 0;
+		margin: 50px 0;
 		padding: 0;
 		list-style-position: outside;
 		padding-left: 3em;
@@ -158,20 +158,21 @@ headerTemplate3.innerHTML = `
   <ol id="list">
     <li><a href="index.html">About</a></li>
 	<hr><b>Agama</b><hr class="hrnone">
-	<li><a href="agama.html">Baca alquran</a></li>
+		<li><a href="agama.html">Baca alquran</a></li>
 	<hr><b>Bahasa</b><hr class="hrnone">
-	<li><a href="0001.html">Vocab</a></li>
+		<li><a href="0001.html">Vocab</a></li>
 	<hr><b>Teka Kata</b><hr class="hrnone">
-	<li><a href="index3-1.html">Ayat</a></li>
-	<li><a href="index2-1.html">Benda</a></li>
-	<li><a href="indexb.html">Maths</a></li>
-	<li><a href="random1.html">Random</a></li>
+		<li><a href="index3-1.html">Ayat</a></li>
+		<li><a href="index2-1.html">Benda</a></li>
+		<li><a href="indexb.html">Maths</a></li>
+		<li><a href="random1.html">Random</a></li>
 	<hr><b>Maths</b><hr class="hrnone">
-	<li><a href="maths1-1.html">Tambah</a></li>
-	<li><a href="maths2-1.html">Tolak</a></li>
-	<li><a href="jam.html">Teka Jam</a></li>
-	<li><a href="abacus.html">Abacus</a></li>
-	<li><a href="rounded.html">Rounding</a></li>
+		<li><a href="maths1-1.html">Tambah</a></li>
+		<li><a href="maths2-1.html">Tolak</a></li>
+		<li><a href="0002.html">Darab</a></li>
+		<li><a href="jam.html">Teka Jam</a></li>
+		<li><a href="abacus.html">Abacus</a></li>
+		<li><a href="rounded.html">Rounding</a></li>
   </ol>
 </div>
 `;

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="header.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="maths.css">
+  <title>Multiplication</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    h3 {
+      margin-top: 20px;
+      color: #333;
+    }
+
+    #controls {
+      margin-top: 15px;
+    }
+
+    select {
+      font-size: 1em;
+      padding: 5px 10px;
+      border-radius: 5px;
+      border: 1px solid #aaa;
+      margin-left: 8px;
+    }
+
+    #questions-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .question-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f8faff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 10px 20px;
+      margin: 8px 0;
+      width: 280px;
+      font-size: 1.3em;
+      box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+      transition: background-color 0.3s ease;
+    }
+
+    .question-number {
+      font-weight: bold;
+      color: #555;
+      margin-right: 10px;
+      width: 25px;
+      text-align: right;
+    }
+
+    .question-text {
+      flex: 1;
+      text-align: right;
+      margin-right: 10px;
+    }
+
+    .answer-input {
+      width: 60px;
+      text-align: center;
+      font-size: 1em;
+      border: 1px solid #888;
+      border-radius: 5px;
+      padding: 4px;
+    }
+
+    /* FIXED feedback cell size */
+    .feedback {
+      display: inline-block;
+      width: 20px;              /* fixed width to prevent shifting */
+      text-align: center;
+      font-weight: bold;
+      margin-left: 10px;
+      font-size: 1.1em;         /* slightly smaller to fit neatly */
+      line-height: 1;           /* ensure stable height */
+      vertical-align: middle;
+    }
+
+    .correct {
+      background-color: #c9f7c9;
+    }
+
+    .wrong {
+      background-color: #f9c0c0;
+    }
+
+    #reset-button {
+      margin-top: 25px;
+      padding: 10px 20px;
+      font-size: 1em;
+      border: none;
+      background-color: #4682b4;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #reset-button:hover {
+      background-color: #5a9bd5;
+    }
+  </style>
+</head>
+<body>
+  <header3-component></header3-component>
+
+  <h3>Multiplication</h3>
+
+  <div id="controls">
+    <label for="table-select"><strong>Select Table:</strong></label>
+    <select id="table-select">
+      <option value="2-12">2–12 (Mixed)</option>
+      <option value="2">×2</option>
+      <option value="3">×3</option>
+      <option value="4">×4</option>
+      <option value="5">×5</option>
+      <option value="6">×6</option>
+      <option value="7">×7</option>
+      <option value="8">×8</option>
+      <option value="9">×9</option>
+      <option value="10">×10</option>
+      <option value="11">×11</option>
+      <option value="12">×12</option>
+    </select>
+  </div>
+
+  <div id="questions-container"></div>
+  <button id="reset-button">Reset Questions</button>
+
+  <script>
+    // Generate random number
+    function generateRandomNumber(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // Generate one multiplication question
+    function generateQuestion(selectedTable) {
+      const num1 = generateRandomNumber(1, 12);
+      let num2;
+
+      if (selectedTable === "2-12") {
+        num2 = generateRandomNumber(2, 12);
+      } else {
+        num2 = parseInt(selectedTable);
+      }
+
+      return { num1, num2, answer: num1 * num2 };
+    }
+
+    // Create a single question row
+    function createQuestionRow(question, index) {
+      const row = document.createElement("div");
+      row.classList.add("question-row");
+
+      const numberSpan = document.createElement("span");
+      numberSpan.classList.add("question-number");
+      numberSpan.textContent = `${index + 1}.`;
+
+      const questionText = document.createElement("span");
+      questionText.classList.add("question-text");
+      questionText.textContent = `${question.num1} × ${question.num2} =`;
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.classList.add("answer-input");
+      input.maxLength = 3;
+      input.placeholder = " ";
+
+      const feedback = document.createElement("span");
+      feedback.classList.add("feedback");
+
+      const correctAnswer = question.answer.toString();
+      const requiredDigits = correctAnswer.length;
+
+      input.addEventListener("input", () => {
+        const userValue = input.value;
+        const userAnswer = parseInt(userValue);
+
+        if (userValue.length === 0) {
+          feedback.textContent = "";
+          input.classList.remove("correct", "wrong");
+          return;
+        }
+
+        if (userValue.length < requiredDigits) {
+          feedback.textContent = "";
+          input.classList.remove("correct", "wrong");
+          return;
+        }
+
+        if (userAnswer === question.answer) {
+          input.classList.remove("wrong");
+          input.classList.add("correct");
+          feedback.textContent = "✓";
+          feedback.style.color = "green";
+          input.disabled = true;
+        } else {
+          input.classList.remove("correct");
+          input.classList.add("wrong");
+          feedback.textContent = "✗";
+          feedback.style.color = "red";
+        }
+      });
+
+      input.addEventListener("keydown", (e) => {
+        if (!/[0-9]/.test(e.key) && e.key !== "Backspace" && e.key !== "Tab") {
+          e.preventDefault();
+        }
+      });
+
+      row.appendChild(numberSpan);
+      row.appendChild(questionText);
+      row.appendChild(input);
+      row.appendChild(feedback);
+
+      return row;
+    }
+
+    // Generate all questions
+    function generateQuestions() {
+      const container = document.getElementById("questions-container");
+      container.innerHTML = "";
+
+      const selectedTable = document.getElementById("table-select").value;
+
+      for (let i = 0; i < 5; i++) {
+        const question = generateQuestion(selectedTable);
+        const row = createQuestionRow(question, i);
+        container.appendChild(row);
+      }
+    }
+
+    document.getElementById("reset-button").addEventListener("click", generateQuestions);
+    document.getElementById("table-select").addEventListener("change", generateQuestions);
+    window.onload = generateQuestions;
+  </script>
+</body>
+</html>
