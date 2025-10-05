@@ -5,23 +5,31 @@ headerTemplate3.innerHTML = `
 	.header {
 		display: flex;
 		align-items: center;
+		gap: 10px;
 		margin: 0 auto;
-		border-bottom: 5px solid #ccc;
-		background-color: #f7edff;
+		padding: 8px 8px;
+		max-width: 600px;
 		position: sticky;
 		top: 0;
-		max-width: 600px;
-		z-index: 1000; /* Ensure it appears above other content */
+		z-index: 998;
+		background: linear-gradient(90deg, #f3e8ff, #e0f0ff);
+		box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+		border-bottom: 2px solid #d5c9ff;
+		border-radius: 0 0 10px 10px;
+		backdrop-filter: blur(6px);
+		transition: background 0.3s ease;
 	}
 	
 	.menu {
-		max-width: 20px;
-		border: 1px solid #ccc;
-		background-color: white;
-		border-radius: 5px;
-		margin: 5px 10px;
+		max-width: 24px;
+		border: 1px solid #ddd;
+		background-color: #fff;
+		border-radius: 6px;
 		padding: 4px;
 		cursor: pointer;
+		display: block;
+		object-fit: contain;
+		transition: transform 0.2s ease, box-shadow 0.2s ease;
 	}
 
 	h1 {
@@ -33,7 +41,6 @@ headerTemplate3.innerHTML = `
 		padding: 5px 0;
 		margin: 0;
 		max-width: 50rem;
-		width: 100%;
 	}	
 	
 	h1 a {
@@ -41,7 +48,7 @@ headerTemplate3.innerHTML = `
 		color: white;
 		background-color: #555;
 		border-radius: 4px;
-		padding: 6px 6px;
+		padding: 8px 6px;
 	}
 	
 	.scroll-box {
@@ -131,10 +138,6 @@ headerTemplate3.innerHTML = `
 	}
 	
 	@media (max-width: 600px) {
-		.header {
-			border: none;
-			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-		}
 		.scroll-box {
 			width: 70%;
 		}
@@ -144,6 +147,7 @@ headerTemplate3.innerHTML = `
 <div class="header">
   <img src="menu.svg" class="menu" alt="Menu Icon"></img>
   <h1><a href="index.html">Bazli's Playschool</a></h1>
+  <a href="0003.html"><img src="b.gif" class="menu"></img></a>
 </div>
 <div id="overlay"></div>
 <div class="scroll-box" id="scroll-box">
@@ -246,46 +250,14 @@ class Header3 extends HTMLElement {
 			document.removeEventListener('touchmove', preventTouchScroll);
 		}
 
-		// Search functionality
-		searchBox.addEventListener('input', function () {
+		// Simplified search functionality
+		searchBox.addEventListener('input', () => {
 			const filter = searchBox.value.toLowerCase();
-			const items = list.querySelectorAll('li');
-			const headings = list.querySelectorAll('b');
-			const horizontalRules = list.querySelectorAll('hr');
-
-			items.forEach((item) => {
-				const text = item.textContent.toLowerCase();
-				item.style.display = text.includes(filter) ? '' : 'none';
+			list.querySelectorAll('li').forEach(li => {
+				li.style.display = li.textContent.toLowerCase().includes(filter) ? '' : 'none';
 			});
-
-			if (!filter) {
-				headings.forEach((heading) => heading.style.display = '');
-				horizontalRules.forEach((hr) => hr.style.display = '');
-				return;
-			}
-
-			headings.forEach((heading) => {
-				const listItems = heading.nextElementSibling
-					? heading.nextElementSibling.querySelectorAll('li')
-					: [];
-				let anyVisible = false;
-
-				listItems.forEach((item) => {
-					if (item.style.display !== 'none') {
-						anyVisible = true;
-					}
-				});
-
-				heading.style.display = anyVisible ? '' : 'none';
-			});
-
-			horizontalRules.forEach((hr) => {
-				const nextSibling = hr.nextElementSibling;
-				if (nextSibling && nextSibling.style.display !== 'none') {
-					hr.style.display = '';
-				} else {
-					hr.style.display = 'none';
-				}
+			list.querySelectorAll('b, hr').forEach(el => {
+				el.style.display = filter ? 'none' : '';
 			});
 		});
 	}
