@@ -168,6 +168,7 @@ headerTemplate3.innerHTML = `
 	<hr><b>Teka Kata</b><hr class="hrnone">
 		<li><a href="index3-1.html">Ayat</a></li>
 		<li><a href="index2-1.html">Benda</a></li>
+		<li><a href="0004.html">Crossmaths</a></li>
 		<li><a href="indexb.html">Maths</a></li>
 		<li><a href="random1.html">Random</a></li>
 	<hr><b>Maths</b><hr class="hrnone">

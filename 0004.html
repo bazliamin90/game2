@@ -3,29 +3,43 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
+<script src="header.js"></script>
 <title>Crossmaths</title>
 <style>
   body{
-    display:flex;
+    margin: 0 auto;
+    overflow-y: scroll;
     flex-direction:column;
     align-items:center;
     font-family:monospace;
-    background:#f0f0f0;
-    padding:20px;
+    background:white;
+  }
+  h2 {
+    text-align:center;
+  }
+  .game-container {
+    max-width: 550px;
+    margin: 10px auto;
+    padding: 10px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   }
   .grid{
     display:grid;
     grid-template-columns:repeat(5,50px); /* wider for 3-digit answers */
-    grid-template-rows:repeat(5,50px);
+    grid-template-rows:repeat(5,40px);
     gap:2px;
+    justify-content:center;
   }
   .cell{
     background:white;
     border:1px solid #ccc;
+    border-radius: 6px;
     display:flex;
     justify-content:center;
     align-items:center;
-    font-size:16px;
+    font-size:14px;
     cursor:default;
     transition: background 0.3s, box-shadow 0.3s;
     word-wrap: break-word;
@@ -49,21 +63,23 @@
     justify-content:center;
   }
   .number-pad button{
-    padding: 5px 10px;
-    font-size:14px;
+    padding: 5px 7px;
+    font-size:12px;
     font-family: monospace;
     cursor:pointer;
   }
   #message{
-    margin-top:15px;
-    font-size:18px;
+    margin-top:10px;
+    font-size:16px;
     font-weight:bold;
     color:green;
   }
 </style>
 </head>
 <body>
-<h2>Crossmaths</h2>
+  <header3-component></header3-component>
+<div class="game-container">
+  <h2>Crossmaths</h2>
 <div class="grid" id="grid"></div>
 
 <div class="number-pad" id="pad">
@@ -77,12 +93,12 @@
   <button data-num="7">7</button>
   <button data-num="8">8</button>
   <button data-num="9">9</button>
-  <button id="backspace">←</button>
+  <button id="backspace">Backspace</button>
   <button id="reset">Reset</button>
 </div>
 
 <div id="message"></div>
-
+</div>
 <script>
 // --- PUZZLE GENERATION ---
 function randInt(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
@@ -209,7 +225,7 @@ function checkAllCorrect(){
   });
 
   if(allCorrect && blanks.length > 0){
-    message.textContent = '🎉 Congratulations! All answers are correct!';
+    message.textContent = '🎉 Fuyoo! Power ooo!';
   } else {
     message.textContent = '';
   }
