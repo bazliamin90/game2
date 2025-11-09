@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Crossmaths</title>
+<style>
+  body{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    font-family:monospace;
+    background:#f0f0f0;
+    padding:20px;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(5,50px); /* wider for 3-digit answers */
+    grid-template-rows:repeat(5,50px);
+    gap:2px;
+  }
+  .cell{
+    background:white;
+    border:1px solid #ccc;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:16px;
+    cursor:default;
+    transition: background 0.3s, box-shadow 0.3s;
+    word-wrap: break-word;
+  }
+  .cell.blank{
+    background: #ffff99; /* yellow for unanswered */
+    cursor: pointer;
+  }
+  .cell.blank.active{
+    box-shadow: 0 0 8px 3px #ff6600; /* glowing border */
+  }
+  .cell.black{
+    background:black;
+    cursor:default;
+  }
+  .number-pad{
+    margin-top:20px;
+    display:flex;
+    gap:5px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .number-pad button{
+    padding: 5px 10px;
+    font-size:14px;
+    font-family: monospace;
+    cursor:pointer;
+  }
+  #message{
+    margin-top:15px;
+    font-size:18px;
+    font-weight:bold;
+    color:green;
+  }
+</style>
+</head>
+<body>
+<h2>Crossmaths</h2>
+<div class="grid" id="grid"></div>
+
+<div class="number-pad" id="pad">
+  <button data-num="0">0</button>
+  <button data-num="1">1</button>
+  <button data-num="2">2</button>
+  <button data-num="3">3</button>
+  <button data-num="4">4</button>
+  <button data-num="5">5</button>
+  <button data-num="6">6</button>
+  <button data-num="7">7</button>
+  <button data-num="8">8</button>
+  <button data-num="9">9</button>
+  <button id="backspace">←</button>
+  <button id="reset">Reset</button>
+</div>
+
+<div id="message"></div>
+
+<script>
+// --- PUZZLE GENERATION ---
+function randInt(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+let correct = {};
+
+function generatePuzzle(){
+  // Only single or double digits for questions
+  const A = randInt(1,99);
+  const B = randInt(1,99);
+  const C = A + B; // could be 2 or 3 digits
+  const D = randInt(0, A);
+  const G = A - D;
+  const E = randInt(0,99);
+  const H = B + E;
+  const F = randInt(0, C);
+  const I = C - F;
+
+  correct = {
+    '0-4': C, // blank C
+    '2-2': E, // blank E
+    '2-4': F, // blank F
+    '4-0': G  // blank G
+  };
+
+  return [
+    [A, '+', B, '=', '?'],
+    ['-', null, '+', null, '-'],
+    [D, null, '?', null, '?'],
+    ['=', null, '=', null, '='],
+    ['?', null, H, null, I]
+  ];
+}
+
+// --- RENDER GRID ---
+const grid = document.getElementById('grid');
+const message = document.getElementById('message');
+let selectedCell = null;
+
+function renderGrid(){
+  grid.innerHTML = '';
+  message.textContent = '';
+  const gridData = generatePuzzle();
+
+  gridData.forEach((row, r) => {
+    row.forEach((val, c) => {
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+
+      if(val === null){
+        cell.classList.add('black');
+      } else if(val === '?'){
+        cell.classList.add('blank');
+        cell.addEventListener('click', ()=>{
+          selectedCell = cell;
+          highlightSelected(cell);
+        });
+      } else {
+        cell.textContent = val;
+      }
+
+      grid.appendChild(cell);
+    });
+  });
+}
+
+function highlightSelected(cell){
+  document.querySelectorAll('.cell.blank').forEach(c => c.classList.remove('active'));
+  if(cell) cell.classList.add('active');
+}
+
+// --- NUMBER PAD ---
+document.querySelectorAll('.number-pad button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    if(!selectedCell) return;
+    if(btn.dataset.num !== undefined){
+      // Allow up to 3 digits
+      selectedCell.textContent = (selectedCell.textContent + btn.dataset.num).slice(0,3);
+      checkCell(selectedCell);
+      checkAllCorrect();
+    }
+  });
+});
+
+document.getElementById('backspace').addEventListener('click', ()=>{
+  if(!selectedCell) return;
+  selectedCell.textContent = '';
+  selectedCell.style.background = '#ffff99';
+  message.textContent = '';
+});
+
+document.getElementById('reset').addEventListener('click', ()=>{
+  renderGrid(); // generate new random puzzle
+  selectedCell = null;
+});
+
+// --- AUTO CHECK CELL ---
+function checkCell(cell){
+  const key = `${cell.dataset.row}-${cell.dataset.col}`;
+  const valText = cell.textContent.trim();
+  const userVal = valText === '' ? NaN : parseInt(valText, 10);
+
+  if(userVal === correct[key]){
+    cell.style.background = '#ccffcc'; // green
+  } else if(!isNaN(userVal)){
+    cell.style.background = '#ff9999'; // red
+  } else {
+    cell.style.background = '#ffff99'; // yellow
+  }
+}
+
+// --- CHECK IF ALL CORRECT ---
+function checkAllCorrect(){
+  const blanks = document.querySelectorAll('.cell.blank');
+  let allCorrect = true;
+
+  blanks.forEach(cell=>{
+    const key = `${cell.dataset.row}-${cell.dataset.col}`;
+    const valText = cell.textContent.trim();
+    const userVal = valText === '' ? NaN : parseInt(valText, 10);
+    if(userVal !== correct[key]) allCorrect = false;
+  });
+
+  if(allCorrect && blanks.length > 0){
+    message.textContent = '🎉 Congratulations! All answers are correct!';
+  } else {
+    message.textContent = '';
+  }
+}
+
+// --- INITIAL RENDER ---
+renderGrid();
+</script>
+</body>
+</html>
