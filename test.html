@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Quiz</title>
+  <style>
+    body {
+      font-family: monospace;
+      text-align: center;
+      margin: 30px 10px;
+    }
+
+    .question {
+      display: inline-flex;
+      align-items: flex-start;
+      font-size: 12px;
+      flex-wrap: wrap;
+    }
+
+    .box, .vertical-box, .answer-container input {
+      padding: 5px 10px;
+      width: 50px;
+      text-align: center;
+      font-size: 14px;
+      border: 2px solid grey;
+      box-sizing: border-box;
+      margin: 2px;
+      transition: box-shadow 0.2s;
+    }
+
+    .answer-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .active {
+      box-shadow: 0 0 10px 3px #42a5f5; /* blue glow */
+    }
+
+    .num-pad {
+      margin-top: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .num-pad button {
+      padding: 5px 10px;
+      margin: 5px;
+      font-family: monospace;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 6px;
+      border: 1px solid grey;
+      background-color: #f0f0f0;
+    }
+
+    .control-buttons {
+      margin: 20px 5px;
+    }
+
+    .control-buttons button {
+      font-size: 14px;
+      font-family: monospace;
+      padding: 5px 10px;
+      cursor: pointer;
+      border: 1px solid grey;
+      background: #f0f0f0;
+      margin: 0 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="question">
+    <div class="box" id="num1"></div>
+    <div class="box">+</div>
+    <div class="box" id="num2"></div>
+    <div class="box">=</div>
+
+    <div class="answer-container">
+      <input type="text" id="answer" maxlength="3" placeholder="?" readonly />
+      <div class="vertical-box">-</div>
+      <input type="text" id="subtrahend" maxlength="3" class="vertical-box" placeholder="?" readonly />
+      <div class="vertical-box">=</div>
+      <div class="vertical-box" id="resultBox"></div>
+    </div>
+  </div>
+
+  <!-- Number pad -->
+  <div class="num-pad" id="numPad"></div>
+
+  <!-- Control buttons -->
+  <div class="control-buttons">
+    <button id="resetButton">Reset</button>
+    <button id="backspaceButton">Backspace</button>
+  </div>
+
+  <script>
+    const num1Box = document.getElementById("num1");
+    const num2Box = document.getElementById("num2");
+    const resultBox = document.getElementById("resultBox");
+    const answerInput = document.getElementById("answer");
+    const subtrahendInput = document.getElementById("subtrahend");
+    const resetButton = document.getElementById("resetButton");
+    const backspaceButton = document.getElementById("backspaceButton");
+    const numPad = document.getElementById("numPad");
+
+    let num1, num2, answer, subtrahend, result;
+    let activeInput = answerInput; // Which box to input numbers
+
+    // Create number pad buttons 1-9
+    for (let i = 1; i <= 9; i++) {
+      const btn = document.createElement("button");
+      btn.textContent = i;
+      btn.addEventListener("click", () => appendNumber(i));
+      numPad.appendChild(btn);
+    }
+    // Add 0 button
+    const zeroBtn = document.createElement("button");
+    zeroBtn.textContent = 0;
+    zeroBtn.addEventListener("click", () => appendNumber(0));
+    numPad.appendChild(zeroBtn);
+
+    function appendNumber(num) {
+      if (activeInput.value.length < 3) {
+        activeInput.value += num;
+        checkInputs();
+      }
+    }
+
+    function randomizeQuestion() {
+      num1 = Math.floor(Math.random() * 99) + 1;
+      num2 = Math.floor(Math.random() * 99) + 1;
+      answer = num1 + num2;
+
+      subtrahend = Math.floor(Math.random() * (answer - 1)) + 1;
+      result = answer - subtrahend;
+
+      num1Box.textContent = num1;
+      num2Box.textContent = num2;
+      resultBox.textContent = result;
+
+      answerInput.value = "";
+      subtrahendInput.value = "";
+      setYellow();
+      setActiveInput(answerInput);
+    }
+
+    function setYellow() {
+      answerInput.style.backgroundColor = "#fff59d";
+      answerInput.style.borderColor = "#333";
+      subtrahendInput.style.backgroundColor = "#fff59d";
+      subtrahendInput.style.borderColor = "#333";
+    }
+
+    function checkInputs() {
+      const answerVal = answerInput.value.trim();
+      const subVal = subtrahendInput.value.trim();
+
+      if (answerVal === "") {
+        answerInput.style.backgroundColor = "#fff59d";
+        answerInput.style.borderColor = "#333";
+      } else if (parseInt(answerVal) === answer) {
+        answerInput.style.backgroundColor = "lightgreen";
+        answerInput.style.borderColor = "green";
+      } else {
+        answerInput.style.backgroundColor = "#fca5a5";
+        answerInput.style.borderColor = "red";
+      }
+
+      if (subVal === "") {
+        subtrahendInput.style.backgroundColor = "#fff59d";
+        subtrahendInput.style.borderColor = "#333";
+      } else if (parseInt(subVal) === subtrahend) {
+        subtrahendInput.style.backgroundColor = "lightgreen";
+        subtrahendInput.style.borderColor = "green";
+      } else {
+        subtrahendInput.style.backgroundColor = "#fca5a5";
+        subtrahendInput.style.borderColor = "red";
+      }
+    }
+
+    function setActiveInput(input) {
+      // Remove previous active class
+      answerInput.classList.remove("active");
+      subtrahendInput.classList.remove("active");
+
+      // Set new active input
+      activeInput = input;
+      activeInput.classList.add("active");
+    }
+
+    // Switch active input when clicked
+    answerInput.addEventListener("click", () => setActiveInput(answerInput));
+    subtrahendInput.addEventListener("click", () => setActiveInput(subtrahendInput));
+
+    // Reset button
+    resetButton.addEventListener("click", randomizeQuestion);
+
+    // Backspace button
+    backspaceButton.addEventListener("click", () => {
+      activeInput.value = activeInput.value.slice(0, -1);
+      checkInputs();
+    });
+
+    // Generate initial question
+    randomizeQuestion();
+  </script>
+
+</body>
+</html>
