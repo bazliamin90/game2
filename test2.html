@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Embedded Google Document</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #eef2f3, #d9e4f5);
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden; /* Prevent horizontal overflow on body */
+    }
+
+    h1 {
+      text-align: center;
+      margin: 20px 10px;
+      font-size: 1.4rem;
+    }
+
+    .iframe-container {
+      position: relative;
+      width: 100%;
+      max-width: 900px;
+      flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      padding: 10px;
+      box-sizing: border-box;
+      overflow: hidden; /* Hide any extra overflow */
+      border-radius: 12px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 80vh;
+      border: 2px solid #b0c4de;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      background: white;
+      overflow: hidden;
+    }
+
+    /* Smooth scrolling for mobile devices */
+    @supports (-webkit-overflow-scrolling: touch) {
+      iframe {
+        -webkit-overflow-scrolling: touch;
+        overflow: auto;
+      }
+    }
+
+    /* Responsive tweaks for smaller screens */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.1rem;
+        margin: 15px 5px;
+      }
+      iframe {
+        height: 85vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>My Embedded Google Document</h1>
+
+  <div class="iframe-container">
+    <iframe 
+      src="https://docs.google.com/document/d/e/2PACX-1vTS8ZEqU0NwcXhoX6YNUkejE-Kz5vC3WL9C9O4bvS1N6xSCSkbDBxHpiLe_yPWv2i9zX1vEH0i7Cs91/pub?embedded=true"
+      allowfullscreen
+      loading="lazy"
+      referrerpolicy="no-referrer"
+    ></iframe>
+  </div>
+</body>
+</html>
