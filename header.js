@@ -2,113 +2,150 @@ const headerTemplate3 = document.createElement('template');
 
 headerTemplate3.innerHTML = `
 <style>
+	/* === Header Styling === */
 	.header {
 		display: flex;
 		align-items: center;
 		gap: 10px;
 		margin: 0 auto;
-		padding: 8px 8px;
+		padding: 4px 12px;
 		max-width: 600px;
 		position: sticky;
 		top: 0;
 		z-index: 998;
-		background: linear-gradient(90deg, #f3e8ff, #e0f0ff);
-		box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-		border-bottom: 2px solid #d5c9ff;
-		border-radius: 0 0 10px 10px;
-		backdrop-filter: blur(6px);
-		transition: background 0.3s ease;
+		background: linear-gradient(90deg, #e8dcff, #d6ecff);
+		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+		border-bottom: 2px solid #c5baff;
+		border-radius: 0 0 14px 14px;
+		backdrop-filter: blur(8px);
+		transition: all 0.3s ease;
 	}
-	
+
+	.header:hover {
+		background: linear-gradient(90deg, #f2e7ff, #e8f3ff);
+	}
+
+	/* === Menu Buttons === */
 	.menu {
-		max-width: 24px;
-		border: 1px solid #ddd;
+		max-width: 28px;
+		border: 1px solid #ccc;
 		background-color: #fff;
-		border-radius: 6px;
-		padding: 4px;
+		border-radius: 8px;
+		padding: 2px;
 		cursor: pointer;
 		display: block;
 		object-fit: contain;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 		transition: transform 0.2s ease, box-shadow 0.2s ease;
 	}
 
+	.menu:hover {
+		transform: scale(1.1);
+		box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+	}
+
+	/* === Title === */
 	h1 {
 		font-family: monospace;
-		font-size: 14px;
+		font-size: 15px;
 		text-align: left;
 		display: flex;
 		align-items: center;
 		padding: 5px 0;
 		margin: 0;
 		max-width: 50rem;
-	}	
-	
+	}
+
 	h1 a {
 		text-decoration: none;
 		color: white;
-		background-color: #555;
-		border-radius: 4px;
-		padding: 8px 6px;
+		background: linear-gradient(135deg, #444, #666);
+		border-radius: 6px;
+		padding: 8px 10px;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+		transition: background 0.3s ease;
 	}
-	
+
+	h1 a:hover {
+		background: linear-gradient(135deg, #333, #555);
+	}
+
+	/* === Slide Menu Box === */
 	.scroll-box {
 		position: fixed;
 		top: 0;
 		left: 0;
-		height: 100vh;
-		width: 250px;
+		height: 96vh;
+		width: 260px;
 		max-width: 90%;
-		border-right: 3px solid black;
-		padding: 10px;
-		background-color: white;
+		border-right: 3px solid #b3aaff;
+		padding: 14px 10px;
+		background: linear-gradient(180deg, #ffffff, #f8f9ff);
 		overflow-y: auto;
-		box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2);
+		-webkit-overflow-scrolling: touch;
+		touch-action: pan-y;
+		box-shadow: 4px 0 12px rgba(0, 0, 0, 0.25);
 		transform: translateX(-110%);
-  		transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 		z-index: 1000;
+		border-radius: 0 10px 10px 0;
 	}
 
 	.scroll-box.visible {
 		transform: translateX(0);
 	}
 
+	/* === Scrollbox Header === */
 	.scroll-box .close-message {
 		font-family: monospace;
-		font-size: 8px;
+		font-size: 10px;
 		color: grey;
 		margin-bottom: 10px;
 		text-align: center;
 		font-style: italic;
 	}
 
+	/* === Search Box === */
 	.scroll-box .search-box {
-		width: 90%;
-		padding: 5px;
-		margin-bottom: 10px;
+		width: 92%;
+		padding: 6px;
+		margin-bottom: 12px;
 		font-family: monospace;
-		font-size: 12px;
-		border: 1px solid blue;
-		border-radius: 4px;
+		font-size: 13px;
+		border: 1px solid #8dafff;
+		border-radius: 6px;
+		outline: none;
+		transition: box-shadow 0.2s ease;
 	}
 
+	.scroll-box .search-box:focus {
+		box-shadow: 0 0 5px #9cbcff;
+	}
+
+	/* === List Section === */
 	.scroll-box ol {
 		font-family: monospace;
-		margin: 50px 0;
+		margin: 40px 0;
 		padding: 0;
 		list-style-position: outside;
-		padding-left: 3em;
-		color: red;
+		padding-left: 2.5em;
+		color: #555;
 	}
 
 	.scroll-box ol a {
 		font-family: monospace;
-		text-decoration: underline #ccc dotted;
+		text-decoration: underline dotted #ccc;
 		text-underline-offset: 3px;
-		color: #555;
+		color: #333;
+		transition: color 0.2s ease;
+	}
+
+	.scroll-box ol a:hover {
+		color: #0073e6;
 	}
 
 	.scroll-box li {
-		font-size: 0.9em;
+		font-size: 0.95em;
 		padding-bottom: 10px;
 	}
 
@@ -116,32 +153,40 @@ headerTemplate3.innerHTML = `
 		text-align: left;
 	}
 
+	/* === Section Divider === */
 	.hrnone {
-		border: 1px solid #f9f9f9;
+		border: 1px solid #f3f3f3;
 	}
 
+	/* === Overlay Background === */
 	#overlay {
 		position: fixed;
 		top: 0;
 		left: 0;
 		width: 100%;
 		height: 100%;
-		background-color: rgba(0, 0, 0, 0.7);
+		background: rgba(0, 0, 0, 0.6);
 		opacity: 0;
-  		visibility: hidden;
-  		transition: opacity 0.3s ease;
-		z-index: 999;
+		visibility: hidden;
 		transition: opacity 0.3s ease;
+		z-index: 999;
 	}
 
 	#overlay.visible {
-  		opacity: 1;
-  		visibility: visible;
+		opacity: 1;
+		visibility: visible;
 	}
-	
+
+	/* === Responsive Mobile Adjustment === */
 	@media (max-width: 600px) {
 		.scroll-box {
-			width: 70%;
+			width: 75%;
+			border-right: 3px solid #a599ff;
+			box-shadow: 3px 0 8px rgba(0, 0, 0, 0.2);
+		}
+
+		h1 {
+			font-size: 13px;
 		}
 	}
 </style>
