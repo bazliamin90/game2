@@ -63,8 +63,8 @@ headerTemplate3.innerHTML = `
 		background-color: white;
 		overflow-y: auto;
 		box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2);
-		transition: transform 0.3s ease;
-		transform: translateX(-100%);
+		transform: translateX(-110%);
+  		transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 		z-index: 1000;
 	}
 
@@ -127,14 +127,16 @@ headerTemplate3.innerHTML = `
 		width: 100%;
 		height: 100%;
 		background-color: rgba(0, 0, 0, 0.7);
-		display: none;
+		opacity: 0;
+  		visibility: hidden;
+  		transition: opacity 0.3s ease;
 		z-index: 999;
 		transition: opacity 0.3s ease;
 	}
 
 	#overlay.visible {
-		display: block;
-		opacity: 1;
+  		opacity: 1;
+  		visibility: visible;
 	}
 	
 	@media (max-width: 600px) {
@@ -229,16 +231,21 @@ class Header3 extends HTMLElement {
 		}
 
 		function showScrollBox(scrollBox, overlay) {
-			scrollBox.classList.add('visible');
-			overlay.classList.add('visible');
+  scrollBox.classList.add('visible');
+  overlay.classList.add('visible');
 
-			// Disable background scrolling
-			const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
-			document.body.style.overflow = 'hidden';
-			document.body.style.paddingRight = `${scrollBarWidth}px`;
+  // Disable background scrolling
+  const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+  document.body.style.overflow = 'hidden';
+  document.body.style.paddingRight = `${scrollBarWidth}px`;
 
-			document.addEventListener('touchmove', preventTouchScroll, { passive: false });
-		}
+  // Allow scrolling inside the scroll box only
+  document.addEventListener('touchmove', function allowScrollBox(e) {
+    if (!scrollBox.contains(e.target)) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+}
 
 		function hideScrollBox(scrollBox, overlay) {
 			scrollBox.classList.remove('visible');
