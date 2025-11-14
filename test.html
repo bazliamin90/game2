@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Doc EPUB Viewer</title>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
+
+    #viewer {
+      width: 100vw;
+      height: 100vh;
+      background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    #loading {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      color: #666;
+    }
+  </style>
+
+  <!-- EPUB.js library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/epubjs/0.3.93/epub.min.js"></script>
+</head>
+<body>
+
+<div id="loading">Loading EPUB…</div>
+<div id="viewer"></div>
+
+<script>
+  // Replace with your Google Doc File ID
+  const FILE_ID = "Y1UYybWr-OtIK3uTcONGT35Gop6uphcQbE8uRAekUbkP0";
+
+  // Google Docs EPUB export link
+  const epubUrl = `https://docs.google.com/document/d/${FILE_ID}/export?format=epub`;
+
+  // Initialize EPUB.js
+  const book = ePub(epubUrl);
+
+  // Render to viewer
+  const viewer = document.getElementById("viewer");
+  const rendition = book.renderTo(viewer, {
+    width: "100%",
+    height: "100%",
+    spread: "none",
+    flow: "paginated"    // change to "scrolled" if you prefer scrolling
+  });
+
+  rendition.display().then(() => {
+    document.getElementById("loading").style.display = "none";
+  });
+</script>
+
+</body>
+</html>

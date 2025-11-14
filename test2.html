@@ -3,80 +3,93 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Embedded Google Document</title>
+  <title>Google Doc PDF Viewer (No Pop-Out)</title>
+
+  <!-- PDF.js library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js"></script>
+
   <style>
-    body {
-      font-family: "Segoe UI", Arial, sans-serif;
+    html, body {
       margin: 0;
       padding: 0;
-      background: linear-gradient(135deg, #eef2f3, #d9e4f5);
-      color: #333;
+      height: 100%;
+      width: 100%;
+      overflow: auto;
+      background: #f8f8f8;
+      font-family: Arial, sans-serif;
+    }
+
+    #pdfContainer {
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 100vh;
-      overflow-x: hidden; /* Prevent horizontal overflow on body */
-    }
-
-    h1 {
-      text-align: center;
-      margin: 20px 10px;
-      font-size: 1.4rem;
-    }
-
-    .iframe-container {
-      position: relative;
       width: 100%;
-      max-width: 900px;
-      flex-grow: 1;
-      display: flex;
-      justify-content: center;
+      min-height: 100vh;
       padding: 10px;
       box-sizing: border-box;
-      overflow: hidden; /* Hide any extra overflow */
-      border-radius: 12px;
     }
 
-    iframe {
-      width: 100%;
-      height: 80vh;
-      border: 2px solid #b0c4de;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-      background: white;
-      overflow: hidden;
+    canvas {
+      margin-bottom: 10px;
+      max-width: 100%;
+      height: auto;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      border-radius: 4px;
     }
 
-    /* Smooth scrolling for mobile devices */
-    @supports (-webkit-overflow-scrolling: touch) {
-      iframe {
-        -webkit-overflow-scrolling: touch;
-        overflow: auto;
-      }
-    }
-
-    /* Responsive tweaks for smaller screens */
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 1.1rem;
-        margin: 15px 5px;
-      }
-      iframe {
-        height: 85vh;
-      }
+    #loading {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      color: #444;
     }
   </style>
 </head>
 <body>
-  <h1>My Embedded Google Document</h1>
 
-  <div class="iframe-container">
-    <iframe 
-      src="https://docs.google.com/document/d/e/2PACX-1vTS8ZEqU0NwcXhoX6YNUkejE-Kz5vC3WL9C9O4bvS1N6xSCSkbDBxHpiLe_yPWv2i9zX1vEH0i7Cs91/pub?embedded=true"
-      allowfullscreen
-      loading="lazy"
-      referrerpolicy="no-referrer"
-    ></iframe>
-  </div>
+<div id="loading">Loading document…</div>
+<div id="pdfContainer"></div>
+
+<script>
+  const FILE_ID = "1UYybWr-OtIK3uTcONGT35Gop6uphcQbE8uRAekUbkP0"; // <-- Replace with your Google Doc file ID
+  const pdfUrl = `https://docs.google.com/document/d/${FILE_ID}/export?format=pdf`;
+
+  const container = document.getElementById('pdfContainer');
+  const loading = document.getElementById('loading');
+
+  // PDF.js initialization
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js';
+
+  pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
+    const numPages = pdf.numPages;
+
+    // Render all pages
+    for (let i = 1; i <= numPages; i++) {
+      pdf.getPage(i).then(page => {
+        const scale = 1.5; // Adjust zoom
+        const viewport = page.getViewport({ scale });
+
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        container.appendChild(canvas);
+
+        page.render({ canvasContext: context, viewport }).promise.then(() => {
+          if (i === numPages) {
+            loading.style.display = 'none'; // hide loading when last page renders
+          }
+        });
+      });
+    }
+  }).catch(err => {
+    loading.textContent = 'Failed to load PDF.';
+    console.error(err);
+  });
+</script>
+
 </body>
 </html>
