@@ -3,40 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Google Doc PDF Viewer (No Pop-Out)</title>
-
-  <!-- PDF.js library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js"></script>
-
+  <title>Google Doc PDF Viewer</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
-      width: 100%;
-      overflow: auto;
+      overflow: hidden;
       background: #f8f8f8;
       font-family: Arial, sans-serif;
     }
 
-    #pdfContainer {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
-      min-height: 100vh;
-      padding: 10px;
-      box-sizing: border-box;
+    .viewer-frame {
+      width: 100vw;
+      height: 100vh;
+      border: none;
     }
 
-    canvas {
-      margin-bottom: 10px;
-      max-width: 100%;
-      height: auto;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      border-radius: 4px;
-    }
-
+    /* Optional loading message */
     #loading {
       position: fixed;
       top: 50%;
@@ -50,45 +34,24 @@
 <body>
 
 <div id="loading">Loading document…</div>
-<div id="pdfContainer"></div>
+
+<iframe
+  class="viewer-frame"
+  id="docFrame"
+  src=""
+  onload="document.getElementById('loading').style.display='none';">
+</iframe>
 
 <script>
-  const FILE_ID = "1UYybWr-OtIK3uTcONGT35Gop6uphcQbE8uRAekUbkP0"; // <-- Replace with your Google Doc file ID
+  // Replace with your own Google Doc file ID
+  const FILE_ID = "1UYybWr-OtIK3uTcONGT35Gop6uphcQbE8uRAekUbkP0";
+
+  // Construct the viewer URL
   const pdfUrl = `https://docs.google.com/document/d/${FILE_ID}/export?format=pdf`;
+  const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true`;
 
-  const container = document.getElementById('pdfContainer');
-  const loading = document.getElementById('loading');
-
-  // PDF.js initialization
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js';
-
-  pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-    const numPages = pdf.numPages;
-
-    // Render all pages
-    for (let i = 1; i <= numPages; i++) {
-      pdf.getPage(i).then(page => {
-        const scale = 1.5; // Adjust zoom
-        const viewport = page.getViewport({ scale });
-
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-
-        container.appendChild(canvas);
-
-        page.render({ canvasContext: context, viewport }).promise.then(() => {
-          if (i === numPages) {
-            loading.style.display = 'none'; // hide loading when last page renders
-          }
-        });
-      });
-    }
-  }).catch(err => {
-    loading.textContent = 'Failed to load PDF.';
-    console.error(err);
-  });
+  // Load into iframe
+  document.getElementById("docFrame").src = viewerUrl;
 </script>
 
 </body>
