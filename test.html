@@ -9,70 +9,63 @@
   :root {
     --bg: #f4f4f7;
     --card-bg: #ffffff;
-    --text: #333;
+    --text: #222;
     --shadow: rgba(0, 0, 0, 0.1);
     --radius: 14px;
   }
 
   body {
-    margin: 10px;
-    padding: 0;
+    margin: 0;
+    padding: 20px;
     background: var(--bg);
-    font-family: monospace;
+    font-family: system-ui, sans-serif;
     color: var(--text);
+    display: flex;
+    justify-content: center;
   }
 
   #doc-wrapper {
-    max-width: 700px;
-    padding: 20px;
+    max-width: 760px;
+    width: 100%;
+    padding: 25px 30px;
     background: var(--card-bg);
     box-shadow: 0 6px 14px var(--shadow);
     border-radius: var(--radius);
-    line-height: 1.6;
+    line-height: 1.7;
+    overflow-x: hidden;
   }
 
-  /* Google Doc content and all children */
+  /* Force all Google content to behave */
   #doc-wrapper * {
     max-width: 100% !important;
     box-sizing: border-box;
   }
 
-  /* Responsive images */
+  /* Images fix */
   #doc-wrapper img {
-    display: inline-block !important;
-    margin: 0 auto !important;
-    height: auto !important;
-    border-radius: 6px;
     max-width: 100% !important;
-}
+    height: auto !important;
+    display: block;
+    margin: 12px auto;
+    border-radius: 8px;
+  }
 
-  /* Responsive tables */
+  /* Tables */
   #doc-wrapper table {
     width: 100% !important;
-    border-collapse: collapse;
+    border-collapse: collapse !important;
   }
-
-  #doc-wrapper table td, 
-  #doc-wrapper table th {
+  #doc-wrapper td, 
+  #doc-wrapper th {
     padding: 8px;
+    border: 1px solid #ddd;
   }
 
-  /* Optional typography improvements */
-  #doc-wrapper h1 {
-    margin-top: 0;
-    font-size: 2rem;
-  }
-  #doc-wrapper h2 {
-    font-size: 1.6rem;
-  }
-  #doc-wrapper h3 {
-    font-size: 1.3rem;
-  }
+  /* Headings */
+  #doc-wrapper h1 { font-size: 2rem; margin-top: 0; }
+  #doc-wrapper h2 { font-size: 1.6rem; }
+  #doc-wrapper h3 { font-size: 1.3rem; }
 
-  /* Remove accidental overflow */
-  #doc-wrapper {
-    overflow-x: hidden;
-  }
 </style>
 
 </head>
@@ -88,12 +81,31 @@
     const response = await fetch(url);
     let html = await response.text();
 
-    // Remove Google script tags & unwanted elements
+    /* ❌ Remove Google’s injected scripts */
     html = html.replace(/<script[\s\S]*?<\/script>/gi, "");
-    html = html.replace(/<style[\s\S]*?<\/style>/gi, ""); // remove Google styling
-    html = html.replace(/<link[\s\S]*?>/gi, ""); // remove unnecessary CSS links
 
-    // Insert content
+    /* ❌ Remove Google style blocks */
+    html = html.replace(/<style[\s\S]*?<\/style>/gi, "");
+
+    /* ❌ Remove links (fonts, CSS, metadata) */
+    html = html.replace(/<link[\s\S]*?>/gi, "");
+
+    /* ❌ Remove footer containing:
+          "Published using Google Docs"
+          "Report abuse"
+          "Learn more"
+          "Updated automatically every 5 minutes"
+    */
+    html = html.replace(/<div[^>]*id="footer"[\s\S]*?<\/div>/gi, "");
+    html = html.replace(/Published.*?(?=<\/)/gi, "");
+    html = html.replace(/Report abuse/gi, "");
+    html = html.replace(/Learn more/gi, "");
+    html = html.replace(/Updated automatically[\s\S]*?<\//gi, "<");
+
+    /* ❌ Remove empty weird containers */
+    html = html.replace(/<div[^>]*goog[^>]*>[\s\S]*?<\/div>/gi, "");
+
+    /* Insert cleaned doc */
     document.getElementById("doc-wrapper").innerHTML = html;
 
   } catch (err) {
