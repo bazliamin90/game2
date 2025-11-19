@@ -1,56 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Google Doc PDF Viewer</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden;
-      background: #f8f8f8;
-      font-family: Arial, sans-serif;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Google Doc PDF Viewer</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #f0f0f0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 
-    .viewer-frame {
-      width: 100vw;
-      height: 100vh;
-      border: none;
-    }
+  #loading {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+    color: #444;
+  }
 
-    /* Optional loading message */
-    #loading {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 18px;
-      color: #444;
-    }
-  </style>
+  /* Animated gradient border */
+  .viewer-container {
+    border-radius: 12px;
+    padding: 4px;
+    background: linear-gradient(270deg, #6a11cb, #2575fc, #ff6a00, #fbd786, #6a11cb, #2575fc);
+    background-size: 1200% 1200%;
+    animation: gradientShift 20s ease infinite;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    width: 95vw;
+    height: 95vh;
+  }
+
+  /* PDF frame with lively background and inner shadow */
+  .viewer-frame {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    border: none;
+    background: #fff9e6; /* soft pastel yellow */
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.1); /* soft inner shadow */
+  }
+
+  @keyframes gradientShift {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+  }
+</style>
 </head>
 <body>
 
 <div id="loading">Loading document…</div>
 
-<iframe
-  class="viewer-frame"
-  id="docFrame"
-  src=""
-  onload="document.getElementById('loading').style.display='none';">
-</iframe>
+<div class="viewer-container">
+  <iframe
+    class="viewer-frame"
+    id="docFrame"
+    src=""
+    onload="document.getElementById('loading').style.display='none';">
+  </iframe>
+</div>
 
 <script>
-  // Replace with your own Google Doc file ID
   const FILE_ID = "1UYybWr-OtIK3uTcONGT35Gop6uphcQbE8uRAekUbkP0";
-
-  // Construct the viewer URL
   const pdfUrl = `https://docs.google.com/document/d/${FILE_ID}/export?format=pdf`;
   const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true`;
-
-  // Load into iframe
   document.getElementById("docFrame").src = viewerUrl;
 </script>
 
