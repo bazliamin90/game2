@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Search Puzzle</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f6f6f6;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+h2 {
+  text-align: center;
+  z-index: 5;
+}
+
+/* Container */
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  width: 100%;
+  max-width: 900px;
+  position: relative;
+}
+
+/* Grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(15, min(40px, 6vw));
+  grid-template-rows: repeat(15, min(40px, 6vw));
+  gap: 2px;
+  user-select: none;
+  position: relative;
+}
+
+.cell {
+  background: #fff;
+  border: 1px solid #ccc;
+  text-align: center;
+  font-size: min(18px, 4vw);
+  line-height: min(40px, 6vw);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: visible;
+}
+
+.cell.selected {
+  background: #d6fff0 !important;
+}
+
+.cell.highlight {
+  background: #7bed9f !important;
+  color: black;
+  animation: pop 0.4s ease forwards;
+}
+
+/* Word animation */
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+
+/* Word list */
+.word-list {
+  min-width: 200px;
+}
+
+.word-list li.found {
+  text-decoration: line-through;
+  color: #4caf50;
+  font-weight: bold;
+}
+
+/* Completion message overlay */
+#completionMessage {
+  font-size: 32px;
+  font-weight: bold;
+  color: #ff6f91;
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  background: rgba(255,255,255,0.95);
+  padding: 20px 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  text-align: center;
+}
+
+/* Confetti */
+.confetti-piece {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  background: #ffcb77;
+  opacity: 0.8;
+  pointer-events: none;
+  z-index: 9999;
+  animation: fall 3s linear forwards;
+}
+
+@keyframes fall {
+  0% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+}
+
+/* Sparkle trail */
+.sparkle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #fffd70;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.8;
+  z-index: 1000;
+  animation: sparkleAnim 0.8s ease forwards;
+}
+
+@keyframes sparkleAnim {
+  0% { transform: scale(1) translateY(0); opacity: 1; }
+  100% { transform: scale(0) translateY(-20px); opacity: 0; }
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(15, min(28px, 5vw));
+    grid-template-rows: repeat(15, min(28px, 5vw));
+  }
+  .cell {
+    font-size: min(14px, 3vw);
+    line-height: min(28px, 5vw);
+  }
+  #completionMessage {
+    font-size: 24px;
+    padding: 16px 32px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<h2>Word Search Puzzle (Click letters one by one)</h2>
+
+<div class="container">
+  <div id="puzzleGrid" class="grid"></div>
+
+  <div class="word-list">
+    <h3>Words</h3>
+    <ul id="wordList"></ul>
+  </div>
+</div>
+
+<div id="completionMessage">Fuyoo power ooo!</div>
+
+<script>
+const size = 15;
+let grid = Array.from({ length: size }, () => Array(size).fill(""));
+let placedWords = [];
+let selection = [];
+let lockedDirection = null;
+let targetWord = null;
+
+// Load words
+fetch("words.json")
+  .then(res => res.json())
+  .then(data => {
+    const words = data.words.map(w => w.toUpperCase());
+    generatePuzzle(words);
+  });
+
+function generatePuzzle(words) {
+  const directions = [
+    { r: 0, c: 1 }, { r: 1, c: 0 }, { r: 1, c: 1 }, { r: 1, c: -1 },
+    { r: 0, c: -1 }, { r: -1, c: 0 }, { r: -1, c: -1 }, { r: -1, c: 1 }
+  ];
+
+  words.forEach(word => {
+    let placed = false;
+    while (!placed) {
+      const dir = directions[Math.floor(Math.random() * directions.length)];
+      const row = Math.floor(Math.random() * size);
+      const col = Math.floor(Math.random() * size);
+      let r = row, c = col;
+      let fits = true;
+
+      for (let i = 0; i < word.length; i++) {
+        if (r < 0 || r >= size || c < 0 || c >= size || 
+            (grid[r][c] !== "" && grid[r][c] !== word[i])) { fits = false; break; }
+        r += dir.r; c += dir.c;
+      }
+
+      if (!fits) continue;
+
+      let coords = [];
+      r = row; c = col;
+      for (let i = 0; i < word.length; i++) {
+        grid[r][c] = word[i];
+        coords.push({ r, c });
+        r += dir.r; c += dir.c;
+      }
+
+      placedWords.push({ word, coords });
+      placed = true;
+    }
+  });
+
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  for (let r = 0; r < size; r++)
+    for (let c = 0; c < size; c++)
+      if (grid[r][c] === "")
+        grid[r][c] = alphabet[Math.floor(Math.random() * alphabet.length)];
+
+  renderPuzzle();
+}
+
+function renderPuzzle() {
+  const gridDiv = document.getElementById("puzzleGrid");
+  gridDiv.innerHTML = "";
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      cell.textContent = grid[r][c];
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+      cell.addEventListener("click", () => handleCellClick(r, c, cell));
+      gridDiv.appendChild(cell);
+    }
+  }
+  renderWordList();
+}
+
+function renderWordList() {
+  const ul = document.getElementById("wordList");
+  ul.innerHTML = "";
+  placedWords.forEach(w => {
+    const li = document.createElement("li");
+    li.textContent = w.word;
+    li.id = "word-" + w.word;
+    ul.appendChild(li);
+  });
+}
+
+/* CLICK-TO-SELECT LOGIC */
+function handleCellClick(r, c, cell) {
+  // sparkle effect
+  createSparkle(cell);
+
+  if (selection.length === 0) { selection = [{ r, c }]; cell.classList.add("selected"); targetWord = placedWords.filter(w => w.coords.some((p,i)=>p.r===r && p.c===c && i===0)); return; }
+  if (selection.length === 1) {
+    const dir = detectDirection(selection[0], { r, c });
+    if (!dir) return resetSelection();
+    lockedDirection = dir;
+    if (!followsDirection(selection[0], { r, c }, dir)) return resetSelection();
+    addSelection(r, c, cell);
+    checkProgress();
+    return;
+  }
+  if (!followsDirection(selection[0], { r, c }, lockedDirection)) return resetSelection();
+  addSelection(r, c, cell);
+  checkProgress();
+}
+
+// Sparkle trail
+function createSparkle(cell){
+  const rect = cell.getBoundingClientRect();
+  const sparkle = document.createElement('div');
+  sparkle.className = 'sparkle';
+  sparkle.style.left = (rect.left + rect.width/2) + 'px';
+  sparkle.style.top = (rect.top + rect.height/2) + 'px';
+  document.body.appendChild(sparkle);
+  setTimeout(()=>sparkle.remove(),800);
+}
+
+function detectDirection(a, b) {
+  const dr=b.r-a.r, dc=b.c-a.c;
+  if(dr===0 && dc>0) return {r:0,c:1};
+  if(dr===0 && dc<0) return {r:0,c:-1};
+  if(dc===0 && dr>0) return {r:1,c:0};
+  if(dc===0 && dr<0) return {r:-1,c:0};
+  if(dr===dc && dr>0) return {r:1,c:1};
+  if(dr===dc && dr<0) return {r:-1,c:-1};
+  if(dr===-dc && dr>0) return {r:1,c:-1};
+  if(dr===-dc && dr<0) return {r:-1,c:1};
+  return null;
+}
+
+function followsDirection(start, current, dir) { const index=selection.length; return current.r===start.r+dir.r*index && current.c===start.c+dir.c*index; }
+function addSelection(r, c, cell) { if(selection.some(s=>s.r===r && s.c===c)) return; selection.push({r,c}); cell.classList.add("selected"); }
+function resetSelection() { selection.forEach(s=>getCell(s.r,s.c).classList.remove("selected")); selection=[]; lockedDirection=null; targetWord=null; }
+function checkProgress() { if(!targetWord || targetWord.length===0) return resetSelection(); for(let w of placedWords) if(arraysEqual(selection,w.coords)) { markWordFound(w); return; } }
+function markWordFound(w) { w.coords.forEach(({r,c})=>getCell(r,c).classList.add("highlight")); document.getElementById("word-"+w.word).classList.add("found"); resetSelection(); checkCompletion(); }
+function getCell(r,c){return document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);}
+function arraysEqual(a,b){if(a.length!==b.length) return false; return a.every((v,i)=>v.r===b[i].r && v.c===b[i].c);}
+function checkCompletion(){
+  if(placedWords.every(w=>document.getElementById("word-"+w.word).classList.contains("found"))) {
+    const msg = document.getElementById("completionMessage");
+    msg.style.display="block";
+    launchConfetti();
+  }
+}
+
+/* Subtle Confetti */
+function launchConfetti(){
+  for(let i=0;i<80;i++){
+    const confetti=document.createElement('div');
+    confetti.className='confetti-piece';
+    confetti.style.left=Math.random()*100+'vw';
+    confetti.style.background=`hsl(${Math.random()*360},70%,60%)`;
+    confetti.style.animationDuration=(2+Math.random()*2)+'s';
+    document.body.appendChild(confetti);
+    setTimeout(()=>confetti.remove(),3000);
+  }
+}
+</script>
+
+</body>
+</html>
