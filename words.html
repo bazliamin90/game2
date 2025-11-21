@@ -7,9 +7,9 @@
 
 <style>
 body {
-  font-family: Arial, sans-serif;
+  font-family: monospace;
   background: #f6f6f6;
-  padding: 20px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -21,6 +21,30 @@ h2 {
   z-index: 5;
 }
 
+.controls {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+#startBtn {
+  padding: 6px 8px;
+  background: #4caf50;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#startBtn:hover { background: #43a047; }
+
+#category {
+  padding: 6px;
+  font-size: 14px;
+  border-radius: 6px;
+}
+
 /* Container */
 .container {
   display: flex;
@@ -30,6 +54,12 @@ h2 {
   width: 100%;
   max-width: 900px;
   position: relative;
+}
+
+/* Blur lock */
+.blurred {
+  filter: blur(6px);
+  pointer-events: none;
 }
 
 /* Grid */
@@ -48,24 +78,21 @@ h2 {
   text-align: center;
   font-size: min(18px, 4vw);
   line-height: min(40px, 6vw);
-  font-weight: bold;
+  _font-weight: bold;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
-  overflow: visible;
 }
 
 .cell.selected {
-  background: #d6fff0 !important;
+  background: #c2ff26 !important;
 }
 
 .cell.highlight {
-  background: #7bed9f !important;
-  color: black;
+  background: #fbacff !important;
   animation: pop 0.4s ease forwards;
 }
 
-/* Word animation */
 @keyframes pop {
   0% { transform: scale(1); }
   50% { transform: scale(1.4); }
@@ -75,6 +102,7 @@ h2 {
 /* Word list */
 .word-list {
   min-width: 200px;
+  font-size: 14px;
 }
 
 .word-list li.found {
@@ -136,19 +164,71 @@ h2 {
   100% { transform: scale(0) translateY(-20px); opacity: 0; }
 }
 
-/* Mobile adjustments */
+/* ------- MOBILE IMPROVEMENTS ------- */
 @media (max-width: 600px) {
+  h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  .controls {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  #category {
+    font-size: 14px;
+    padding: 5px;
+  }
+
+  .container {
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+  }
+
+  /* GRID with bigger font size */
   .grid {
-    grid-template-columns: repeat(15, min(28px, 5vw));
-    grid-template-rows: repeat(15, min(28px, 5vw));
+    grid-template-columns: repeat(15, min(26px, 5.3vw));
+    grid-template-rows: repeat(15, min(26px, 5.3vw));
+    gap: 1px;
   }
+
   .cell {
-    font-size: min(14px, 3vw);
-    line-height: min(28px, 5vw);
+    font-size: 14px !important;       /* bigger font for mobile */
+    line-height: min(26px, 5.3vw);
   }
+
+  /* Word list properly centered */
+  .word-list {
+    width: 100%;
+    text-align: center;                
+    display: flex;
+    flex-direction: column;
+    align-items: center;               
+  }
+
+  .word-list ul {
+    padding: 0;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .word-list li {
+    font-size: 12px;
+    padding: 2px 0;
+    margin: 2px 6px;
+    display: inline-block;             
+  }
+
   #completionMessage {
-    font-size: 24px;
-    padding: 16px 32px;
+    font-size: 22px;
+    padding: 12px 24px;
   }
 }
 </style>
@@ -156,9 +236,18 @@ h2 {
 
 <body>
 
-<h2>Word Search Puzzle (Click letters one by one)</h2>
+<h2>Word Search Puzzle</h2>
 
-<div class="container">
+<div class="controls">
+  <!-- Dropdown will be populated automatically -->
+  <select id="category">
+    <option>Loading...</option>
+  </select>
+
+  <button id="startBtn">Start</button>
+</div>
+
+<div class="container blurred" id="puzzleContainer">
   <div id="puzzleGrid" class="grid"></div>
 
   <div class="word-list">
@@ -167,25 +256,96 @@ h2 {
   </div>
 </div>
 
-<div id="completionMessage">Fuyoo power ooo!</div>
+<div id="completionMessage">
+  Fuyoo power ooo!<br><br>
+  <button id="refreshBtn" style="
+      padding: 8px 18px;
+      background: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;">
+    Refresh Puzzle
+  </button>
+</div>
 
 <script>
-const size = 15;
-let grid = Array.from({ length: size }, () => Array(size).fill(""));
+let size = 15;
+let grid;
 let placedWords = [];
 let selection = [];
 let lockedDirection = null;
 let targetWord = null;
+let currentCategory = "fruits";
+let wordData;
 
-// Load words
+/* -----------------------------
+   LOAD JSON + POPULATE DROPDOWN
+------------------------------ */
+
 fetch("words.json")
   .then(res => res.json())
   .then(data => {
-    const words = data.words.map(w => w.toUpperCase());
-    generatePuzzle(words);
+    wordData = data;
+    const dropdown = document.getElementById("category");
+    dropdown.innerHTML = "";
+
+    const categories = Object.keys(wordData.categories);
+
+    categories.forEach(cat => {
+      const opt = document.createElement("option");
+      opt.value = cat;
+      opt.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+      dropdown.appendChild(opt);
+    });
+
+    dropdown.value = "fruits";
   });
 
-function generatePuzzle(words) {
+document.getElementById("category").addEventListener("change", function () {
+  currentCategory = this.value;
+});
+
+/* -----------------------------
+   START PUZZLE
+------------------------------ */
+
+document.getElementById("startBtn").addEventListener("click", startPuzzle);
+
+function startPuzzle() {
+  currentCategory = document.getElementById("category").value || "fruits";
+
+  document.getElementById("puzzleContainer").classList.remove("blurred");
+
+  const words = wordData.categories[currentCategory].map(w => w.toUpperCase());
+  newPuzzle(words);
+}
+
+/* -----------------------------
+   REFRESH BUTTON LOGIC
+------------------------------ */
+document.getElementById("refreshBtn").addEventListener("click", () => {
+  document.getElementById("completionMessage").style.display = "none";
+  document.getElementById("puzzleContainer").classList.add("blurred");
+  selection = [];
+  lockedDirection = null;
+
+  const words = wordData.categories[currentCategory].map(w => w.toUpperCase());
+  newPuzzle(words);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+/* -----------------------------
+   PUZZLE GENERATION & LOGIC
+------------------------------ */
+
+function newPuzzle(words) {
+  grid = Array.from({ length: size }, () => Array(size).fill(""));
+  placedWords = [];
+  selection = [];
+  lockedDirection = null;
+
   const directions = [
     { r: 0, c: 1 }, { r: 1, c: 0 }, { r: 1, c: 1 }, { r: 1, c: -1 },
     { r: 0, c: -1 }, { r: -1, c: 0 }, { r: -1, c: -1 }, { r: -1, c: 1 }
@@ -197,15 +357,16 @@ function generatePuzzle(words) {
       const dir = directions[Math.floor(Math.random() * directions.length)];
       const row = Math.floor(Math.random() * size);
       const col = Math.floor(Math.random() * size);
-      let r = row, c = col;
-      let fits = true;
 
+      let r = row, c = col, fits = true;
       for (let i = 0; i < word.length; i++) {
-        if (r < 0 || r >= size || c < 0 || c >= size || 
-            (grid[r][c] !== "" && grid[r][c] !== word[i])) { fits = false; break; }
+        if (r < 0 || r >= size || c < 0 || c >= size ||
+            (grid[r][c] !== "" && grid[r][c] !== word[i])) {
+          fits = false;
+          break;
+        }
         r += dir.r; c += dir.c;
       }
-
       if (!fits) continue;
 
       let coords = [];
@@ -215,7 +376,6 @@ function generatePuzzle(words) {
         coords.push({ r, c });
         r += dir.r; c += dir.c;
       }
-
       placedWords.push({ word, coords });
       placed = true;
     }
@@ -233,6 +393,7 @@ function generatePuzzle(words) {
 function renderPuzzle() {
   const gridDiv = document.getElementById("puzzleGrid");
   gridDiv.innerHTML = "";
+
   for (let r = 0; r < size; r++) {
     for (let c = 0; c < size; c++) {
       const cell = document.createElement("div");
@@ -240,16 +401,20 @@ function renderPuzzle() {
       cell.textContent = grid[r][c];
       cell.dataset.row = r;
       cell.dataset.col = c;
+
       cell.addEventListener("click", () => handleCellClick(r, c, cell));
+
       gridDiv.appendChild(cell);
     }
   }
+
   renderWordList();
 }
 
 function renderWordList() {
   const ul = document.getElementById("wordList");
   ul.innerHTML = "";
+
   placedWords.forEach(w => {
     const li = document.createElement("li");
     li.textContent = w.word;
@@ -258,75 +423,129 @@ function renderWordList() {
   });
 }
 
-/* CLICK-TO-SELECT LOGIC */
+/* ---- CLICK SELECTION LOGIC ---- */
+
 function handleCellClick(r, c, cell) {
-  // sparkle effect
+  if (document.getElementById("puzzleContainer").classList.contains("blurred")) return;
+
   createSparkle(cell);
 
-  if (selection.length === 0) { selection = [{ r, c }]; cell.classList.add("selected"); targetWord = placedWords.filter(w => w.coords.some((p,i)=>p.r===r && p.c===c && i===0)); return; }
+  if (selection.length === 0) {
+    selection = [{ r, c }];
+    cell.classList.add("selected");
+    return;
+  }
+
   if (selection.length === 1) {
-    const dir = detectDirection(selection[0], { r, c });
+    const dir = detectDirection(selection[0], {r, c});
     if (!dir) return resetSelection();
     lockedDirection = dir;
-    if (!followsDirection(selection[0], { r, c }, dir)) return resetSelection();
+
+    if (!followsDirection(selection[0], {r, c}, dir)) return resetSelection();
+
     addSelection(r, c, cell);
     checkProgress();
     return;
   }
-  if (!followsDirection(selection[0], { r, c }, lockedDirection)) return resetSelection();
+
+  if (!followsDirection(selection[0], {r, c}, lockedDirection))
+    return resetSelection();
+
   addSelection(r, c, cell);
   checkProgress();
 }
 
-// Sparkle trail
-function createSparkle(cell){
+function createSparkle(cell) {
   const rect = cell.getBoundingClientRect();
-  const sparkle = document.createElement('div');
-  sparkle.className = 'sparkle';
-  sparkle.style.left = (rect.left + rect.width/2) + 'px';
-  sparkle.style.top = (rect.top + rect.height/2) + 'px';
+  const sparkle = document.createElement("div");
+  sparkle.className = "sparkle";
+  sparkle.style.left = rect.left + rect.width/2 + "px";
+  sparkle.style.top = rect.top + rect.height/2 + "px";
   document.body.appendChild(sparkle);
-  setTimeout(()=>sparkle.remove(),800);
+  setTimeout(() => sparkle.remove(), 800);
 }
 
 function detectDirection(a, b) {
-  const dr=b.r-a.r, dc=b.c-a.c;
-  if(dr===0 && dc>0) return {r:0,c:1};
-  if(dr===0 && dc<0) return {r:0,c:-1};
-  if(dc===0 && dr>0) return {r:1,c:0};
-  if(dc===0 && dr<0) return {r:-1,c:0};
-  if(dr===dc && dr>0) return {r:1,c:1};
-  if(dr===dc && dr<0) return {r:-1,c:-1};
-  if(dr===-dc && dr>0) return {r:1,c:-1};
-  if(dr===-dc && dr<0) return {r:-1,c:1};
+  const dr = b.r - a.r;
+  const dc = b.c - a.c;
+
+  if(dr === 0 && dc > 0) return {r:0, c:1};
+  if(dr === 0 && dc < 0) return {r:0, c:-1};
+  if(dc === 0 && dr > 0) return {r:1, c:0};
+  if(dc === 0 && dr < 0) return {r:-1, c:0};
+  if(dr === dc && dr > 0) return {r:1, c:1};
+  if(dr === dc && dr < 0) return {r:-1, c:-1};
+  if(dr === -dc && dr > 0) return {r:1, c:-1};
+  if(dr === -dc && dr < 0) return {r:-1, c:1};
   return null;
 }
 
-function followsDirection(start, current, dir) { const index=selection.length; return current.r===start.r+dir.r*index && current.c===start.c+dir.c*index; }
-function addSelection(r, c, cell) { if(selection.some(s=>s.r===r && s.c===c)) return; selection.push({r,c}); cell.classList.add("selected"); }
-function resetSelection() { selection.forEach(s=>getCell(s.r,s.c).classList.remove("selected")); selection=[]; lockedDirection=null; targetWord=null; }
-function checkProgress() { if(!targetWord || targetWord.length===0) return resetSelection(); for(let w of placedWords) if(arraysEqual(selection,w.coords)) { markWordFound(w); return; } }
-function markWordFound(w) { w.coords.forEach(({r,c})=>getCell(r,c).classList.add("highlight")); document.getElementById("word-"+w.word).classList.add("found"); resetSelection(); checkCompletion(); }
-function getCell(r,c){return document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);}
-function arraysEqual(a,b){if(a.length!==b.length) return false; return a.every((v,i)=>v.r===b[i].r && v.c===b[i].c);}
-function checkCompletion(){
-  if(placedWords.every(w=>document.getElementById("word-"+w.word).classList.contains("found"))) {
-    const msg = document.getElementById("completionMessage");
-    msg.style.display="block";
+function followsDirection(start, current, dir) {
+  const index = selection.length;
+  return current.r === start.r + dir.r * index &&
+         current.c === start.c + dir.c * index;
+}
+
+function addSelection(r, c, cell) {
+  if (selection.some(s => s.r === r && s.c === c)) return;
+  selection.push({ r, c });
+  cell.classList.add("selected");
+}
+
+function resetSelection() {
+  selection.forEach(s =>
+    document.querySelector(`.cell[data-row="${s.r}"][data-col="${s.c}"]`)
+      .classList.remove("selected")
+  );
+  selection = [];
+  lockedDirection = null;
+}
+
+function coordsMatch(a, b) {
+  if (a.length !== b.length) return false;
+  return a.every((v,i)=>v.r===b[i].r && v.c===b[i].c);
+}
+
+function checkProgress() {
+  for (let w of placedWords) {
+    if (coordsMatch(selection, w.coords)) {
+      return markWordFound(w);
+    }
+  }
+}
+
+function markWordFound(w) {
+  w.coords.forEach(({ r, c }) => {
+    document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`)
+      .classList.add("highlight");
+  });
+
+  document.getElementById("word-" + w.word).classList.add("found");
+
+  resetSelection();
+  checkCompletion();
+}
+
+function checkCompletion() {
+  if (placedWords.every(w =>
+    document.getElementById("word-" + w.word).classList.contains("found")
+  )) {
+    document.getElementById("completionMessage").style.display = "block";
     launchConfetti();
   }
 }
 
-/* Subtle Confetti */
-function launchConfetti(){
-  for(let i=0;i<80;i++){
-    const confetti=document.createElement('div');
-    confetti.className='confetti-piece';
-    confetti.style.left=Math.random()*100+'vw';
-    confetti.style.background=`hsl(${Math.random()*360},70%,60%)`;
-    confetti.style.animationDuration=(2+Math.random()*2)+'s';
+/* Confetti */
+function launchConfetti() {
+  for (let i = 0; i < 80; i++) {
+    const confetti = document.createElement("div");
+    confetti.className = "confetti-piece";
+    confetti.style.left = Math.random() * 100 + "vw";
+    confetti.style.background = `hsl(${Math.random() * 360},70%,60%)`;
+    confetti.style.animationDuration = (2 + Math.random() * 2) + "s";
+
     document.body.appendChild(confetti);
-    setTimeout(()=>confetti.remove(),3000);
+    setTimeout(() => confetti.remove(), 3000);
   }
 }
 </script>

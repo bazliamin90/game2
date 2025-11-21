@@ -1,12 +1,9 @@
 {
-  "words": [
-    "APPLE",
-    "BANANA",
-    "ORANGE",
-    "MANGO",
-    "PEAR",
-    "GRAPE",
-    "KIWI",
-    "PAPAYA"
-  ]
+  "categories": {
+    "fruits": ["APPLE", "BANANA", "ORANGE", "PEAR", "MANGO", "GRAPE", "PAPAYA", "LYCHEE"],
+    "animals": ["TIGER", "ELEPHANT", "ZEBRA", "MONKEY", "GIRAFFE", "RABBIT", "PANDA", "DOLPHIN"],
+    "countries": ["CANADA", "BRAZIL", "FRANCE", "GERMANY", "JAPAN", "INDIA", "CHINA", "RUSSIA"],
+    "colors": ["RED", "BLUE", "GREEN", "YELLOW", "PURPLE", "ORANGE", "PINK", "BROWN"],
+    "amin-teh": ["SALIM", "HAFIZUL", "LUQMAN", "MOKHSIN", "AJLA", "SALIMAH", "AMINUDDIN"] 
+  }
 }
