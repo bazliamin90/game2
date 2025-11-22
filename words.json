@@ -1,9 +1,9 @@
 {
   "categories": {
-    "fruits": ["APPLE", "BANANA", "ORANGE", "PEAR", "MANGO", "GRAPE", "PAPAYA", "LYCHEE"],
-    "animals": ["TIGER", "ELEPHANT", "ZEBRA", "MONKEY", "GIRAFFE", "RABBIT", "PANDA", "DOLPHIN"],
-    "countries": ["CANADA", "BRAZIL", "FRANCE", "GERMANY", "JAPAN", "INDIA", "CHINA", "RUSSIA"],
-    "colors": ["RED", "BLUE", "GREEN", "YELLOW", "PURPLE", "ORANGE", "PINK", "BROWN"],
-    "amin-teh": ["SALIM", "HAFIZUL", "LUQMAN", "MOKHSIN", "AJLA", "SALIMAH", "AMINUDDIN"] 
+    "amin-teh": ["SALIM", "HAFIZUL", "LUQMAN", "MOKHSIN", "AJLA", "SALIMAH", "AMINUDDIN", "HIDAYAH", "FARAH", "ASMATUN", "FAZLI", "SABINA", "HAFIZAH"],
+    "animals": ["TIGER", "ELEPHANT", "ZEBRA", "MONKEY", "GIRAFFE", "RABBIT", "PANDA", "DOLPHIN", "KANGAROO", "CROCODILE"],
+    "colors": ["RED", "BLUE", "GREEN", "YELLOW", "PURPLE", "ORANGE", "PINK", "BROWN", "BLACK", "WHITE"],
+    "countries": ["CANADA", "BRAZIL", "FRANCE", "GERMANY", "JAPAN", "INDIA", "CHINA", "RUSSIA", "ITALY", "SPAIN","MALAYSIA"],
+    "fruits": ["APPLE", "BANANA", "ORANGE", "PEAR", "MANGO", "GRAPE", "PAPAYA", "LYCHEE", "PEACH", "CHERRY"] 
   }
 }

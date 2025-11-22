@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Word Search Puzzle</title>
+<script src="header.js"></script>
+<title>Cari Perkataan</title>
 
 <style>
-body {
-  font-family: monospace;
-  background: #f6f6f6;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-}
+body{
+    margin: 0 auto;
+    overflow-y: scroll;
+    flex-direction:column;
+    align-items:center;
+    font-family:monospace;
+    background:white;
+  }
 
 h2 {
   text-align: center;
@@ -22,19 +22,21 @@ h2 {
 }
 
 .controls {
-  margin-bottom: 20px;
+  margin: 20px;
+  justify-content: center;
   display: flex;
   gap: 10px;
 }
 
 #startBtn {
-  padding: 6px 8px;
+  padding: 4px 8px;
   background: #4caf50;
   border: none;
   color: white;
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
+  font-family: monospace;
 }
 
 #startBtn:hover { background: #43a047; }
@@ -43,10 +45,12 @@ h2 {
   padding: 6px;
   font-size: 14px;
   border-radius: 6px;
+  font-family: monospace;
 }
 
 /* Container */
 .container {
+  margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
@@ -78,7 +82,6 @@ h2 {
   text-align: center;
   font-size: min(18px, 4vw);
   line-height: min(40px, 6vw);
-  _font-weight: bold;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
@@ -101,8 +104,14 @@ h2 {
 
 /* Word list */
 .word-list {
-  min-width: 200px;
+  padding: 0 10px;
   font-size: 14px;
+  border: 1px solid #fbacff;
+  border-radius: 6px;
+}
+
+.word-list ul {
+  padding-left: 10px;
 }
 
 .word-list li.found {
@@ -168,21 +177,27 @@ h2 {
 @media (max-width: 600px) {
   h2 {
     font-size: 20px;
-    margin-bottom: 10px;
     text-align: center;
   }
 
+  h3 {
+    font-size: 16px;
+    margin: 0 auto;
+  }
+
   .controls {
-    width: 100%;
     display: flex;
-    flex-direction: row;
     justify-content: center;
     gap: 6px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
+  }
+
+  #startBtn {
+    font-size: 12px;
   }
 
   #category {
-    font-size: 14px;
+    font-size: 12px;
     padding: 5px;
   }
 
@@ -206,11 +221,11 @@ h2 {
 
   /* Word list properly centered */
   .word-list {
-    width: 100%;
     text-align: center;                
     display: flex;
     flex-direction: column;
-    align-items: center;               
+    align-items: center;
+    margin: 0 10px;               
   }
 
   .word-list ul {
@@ -235,8 +250,8 @@ h2 {
 </head>
 
 <body>
-
-<h2>Word Search Puzzle</h2>
+<header3-component></header3-component>
+<h2>Cari Perkataan</h2>
 
 <div class="controls">
   <!-- Dropdown will be populated automatically -->
@@ -254,10 +269,18 @@ h2 {
     <h3>Words</h3>
     <ul id="wordList"></ul>
   </div>
-</div>
+</div><br><br>
 
 <div id="completionMessage">
-  Fuyoo power ooo!<br><br>
+  Fuyoo power ooo!<br>
+  <div id="familyImageBox" style="
+    opacity:0;
+    transition: opacity 1.5s ease;
+    text-align:center;
+    margin:10px 0;
+">
+    <img src="family.jpg" style="max-width:250px; border-radius:12px;" />
+</div>
   <button id="refreshBtn" style="
       padding: 8px 18px;
       background: #4caf50;
@@ -277,7 +300,7 @@ let placedWords = [];
 let selection = [];
 let lockedDirection = null;
 let targetWord = null;
-let currentCategory = "fruits";
+let currentCategory = "amin-teh";
 let wordData;
 
 /* -----------------------------
@@ -300,12 +323,36 @@ fetch("words.json")
       dropdown.appendChild(opt);
     });
 
-    dropdown.value = "fruits";
+    dropdown.value = "amin-teh";
   });
 
 document.getElementById("category").addEventListener("change", function () {
   currentCategory = this.value;
 });
+
+// Pilih 8–10 perkataan rawak dari satu kategori
+function getRandomWordsForCategory(categoryName) {
+  const allWords = wordData.categories[categoryName] || [];
+
+  // Shuffle array (copy dulu supaya tak ubah original)
+  const shuffled = [...allWords].sort(() => Math.random() - 0.5);
+
+  // Pilih bilangan antara 8-10 (kalau tak cukup, guna semua yang ada)
+  const minCount = 8;
+  const maxCount = 10;
+  const available = shuffled.length;
+
+  if (available <= minCount) {
+    return shuffled.map(w => w.toUpperCase());
+  }
+
+  const randomCount = Math.min(
+    available,
+    minCount + Math.floor(Math.random() * (maxCount - minCount + 1)) // 8, 9, atau 10
+  );
+
+  return shuffled.slice(0, randomCount).map(w => w.toUpperCase());
+}
 
 /* -----------------------------
    START PUZZLE
@@ -314,11 +361,12 @@ document.getElementById("category").addEventListener("change", function () {
 document.getElementById("startBtn").addEventListener("click", startPuzzle);
 
 function startPuzzle() {
-  currentCategory = document.getElementById("category").value || "fruits";
+  currentCategory = document.getElementById("category").value || "amin-teh";
 
   document.getElementById("puzzleContainer").classList.remove("blurred");
 
-  const words = wordData.categories[currentCategory].map(w => w.toUpperCase());
+  // Guna hanya 8–10 perkataan rawak dari kategori dipilih
+  const words = getRandomWordsForCategory(currentCategory);
   newPuzzle(words);
 }
 
@@ -331,7 +379,10 @@ document.getElementById("refreshBtn").addEventListener("click", () => {
   selection = [];
   lockedDirection = null;
 
-  const words = wordData.categories[currentCategory].map(w => w.toUpperCase());
+  // hide family image on restart
+  document.getElementById("familyImageBox").style.opacity = "0";
+
+  const words = getRandomWordsForCategory(currentCategory);
   newPuzzle(words);
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
@@ -430,30 +481,45 @@ function handleCellClick(r, c, cell) {
 
   createSparkle(cell);
 
+  // === CASE 1: first click ===
   if (selection.length === 0) {
     selection = [{ r, c }];
     cell.classList.add("selected");
     return;
   }
 
+  // === CASE 2: second click → try fast-complete ===
   if (selection.length === 1) {
-    const dir = detectDirection(selection[0], {r, c});
+    const start = selection[0];
+    const end = { r, c };
+
+    // 1) Try complete whole word instantly
+    if (tryFastComplete(start, end)) {
+      resetSelection();
+      checkCompletion();
+      return;
+    }
+
+    // 2) If not a first→last pair, continue normal direction mode
+    const dir = detectDirection(start, end);
     if (!dir) return resetSelection();
+
+    if (!followsDirection(start, end, dir)) return resetSelection();
+
     lockedDirection = dir;
-
-    if (!followsDirection(selection[0], {r, c}, dir)) return resetSelection();
-
     addSelection(r, c, cell);
     checkProgress();
     return;
   }
 
+  // === CASE 3: normal multi-step selecting ===
   if (!followsDirection(selection[0], {r, c}, lockedDirection))
     return resetSelection();
 
   addSelection(r, c, cell);
   checkProgress();
 }
+
 
 function createSparkle(cell) {
   const rect = cell.getBoundingClientRect();
@@ -500,6 +566,30 @@ function resetSelection() {
   selection = [];
   lockedDirection = null;
 }
+function tryFastComplete(start, end) {
+  for (let w of placedWords) {
+    const first = w.coords[0];
+    const last = w.coords[w.coords.length - 1];
+
+    const firstRev = w.coords[w.coords.length - 1];
+    const lastRev = w.coords[0];
+
+    // Forward match
+    if (start.r === first.r && start.c === first.c &&
+        end.r === last.r && end.c === last.c) {
+      markWordFound(w);
+      return true;
+    }
+
+    // Reverse match
+    if (start.r === firstRev.r && start.c === firstRev.c &&
+        end.r === lastRev.r && end.c === lastRev.c) {
+      markWordFound(w);
+      return true;
+    }
+  }
+  return false;
+}
 
 function coordsMatch(a, b) {
   if (a.length !== b.length) return false;
@@ -530,8 +620,18 @@ function checkCompletion() {
   if (placedWords.every(w =>
     document.getElementById("word-" + w.word).classList.contains("found")
   )) {
+
     document.getElementById("completionMessage").style.display = "block";
     launchConfetti();
+
+    /* --- SHOW FAMILY PHOTO ONLY FOR amin-teh --- */
+    if (currentCategory === "amin-teh") {
+      const fam = document.getElementById("familyImageBox");
+      fam.style.opacity = "1";          // fade in (already has CSS transition)
+    } else {
+      // ensure hidden for all other categories
+      document.getElementById("familyImageBox").style.opacity = "0";
+    }
   }
 }
 
