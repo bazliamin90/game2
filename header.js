@@ -73,9 +73,9 @@ headerTemplate3.innerHTML = `
 	/* === Slide Menu Box === */
 	.scroll-box {
 		position: fixed;
-		top: 0;
+		top: 5vh;
 		left: 0;
-		height: 96vh;
+		height: 80vh;
 		width: 260px;
 		max-width: 90%;
 		border-right: 3px solid #b3aaff;
@@ -109,7 +109,6 @@ headerTemplate3.innerHTML = `
 	.scroll-box .search-box {
 		width: 92%;
 		padding: 6px;
-		margin-bottom: 12px;
 		font-family: monospace;
 		font-size: 13px;
 		border: 1px solid #8dafff;

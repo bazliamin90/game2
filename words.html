@@ -41,6 +41,17 @@ h2 {
 
 #startBtn:hover { background: #43a047; }
 
+#refreshBtn {
+  padding: 4px 8px; 
+  background: #4caf50; 
+  color: white; 
+  border: none; 
+  border-radius: 6px; 
+  font-size: 14px; 
+  cursor: pointer;
+  font-family: monospace;
+}
+
 #category {
   padding: 6px;
   font-size: 14px;
@@ -273,25 +284,21 @@ h2 {
 
 <div id="completionMessage">
   Fuyoo power ooo!<br>
-  <div id="familyImageBox" style="
-    opacity:0;
-    transition: opacity 1.5s ease;
-    text-align:center;
-    margin:10px 0;
-">
-    <img src="family.jpg" style="max-width:250px; border-radius:12px;" />
+
+  <div id="rewardImageBox" style="
+      opacity:0;
+      transition: opacity 1.5s ease;
+      text-align:center;
+      margin:10px 0;
+  ">
+      <img id="rewardImage" src="" style="max-width:250px; border-radius:12px;" />
+  </div>
+
+  <button id="refreshBtn">Refresh Puzzle</button>
 </div>
-  <button id="refreshBtn" style="
-      padding: 8px 18px;
-      background: #4caf50;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;">
-    Refresh Puzzle
-  </button>
-</div>
+
+<audio id="clickSound" src="click.mp3" preload="auto"></audio>
+<audio id="finishSound" src="finish.mp3" preload="auto"></audio>
 
 <script>
 let size = 15;
@@ -337,7 +344,6 @@ function getRandomWordsForCategory(categoryName) {
   // Shuffle array (copy dulu supaya tak ubah original)
   const shuffled = [...allWords].sort(() => Math.random() - 0.5);
 
-  // Pilih bilangan antara 8-10 (kalau tak cukup, guna semua yang ada)
   const minCount = 8;
   const maxCount = 10;
   const available = shuffled.length;
@@ -348,7 +354,7 @@ function getRandomWordsForCategory(categoryName) {
 
   const randomCount = Math.min(
     available,
-    minCount + Math.floor(Math.random() * (maxCount - minCount + 1)) // 8, 9, atau 10
+    minCount + Math.floor(Math.random() * (maxCount - minCount + 1))
   );
 
   return shuffled.slice(0, randomCount).map(w => w.toUpperCase());
@@ -365,7 +371,6 @@ function startPuzzle() {
 
   document.getElementById("puzzleContainer").classList.remove("blurred");
 
-  // Guna hanya 8–10 perkataan rawak dari kategori dipilih
   const words = getRandomWordsForCategory(currentCategory);
   newPuzzle(words);
 }
@@ -379,8 +384,8 @@ document.getElementById("refreshBtn").addEventListener("click", () => {
   selection = [];
   lockedDirection = null;
 
-  // hide family image on restart
-  document.getElementById("familyImageBox").style.opacity = "0";
+  // reset reward image
+  document.getElementById("rewardImageBox").style.opacity = "0";
 
   const words = getRandomWordsForCategory(currentCategory);
   newPuzzle(words);
@@ -453,7 +458,10 @@ function renderPuzzle() {
       cell.dataset.row = r;
       cell.dataset.col = c;
 
-      cell.addEventListener("click", () => handleCellClick(r, c, cell));
+      cell.addEventListener("click", () => {
+    playClickSound();
+    handleCellClick(r, c, cell);
+  });
 
       gridDiv.appendChild(cell);
     }
@@ -481,29 +489,24 @@ function handleCellClick(r, c, cell) {
 
   createSparkle(cell);
 
-  // === CASE 1: first click ===
   if (selection.length === 0) {
     selection = [{ r, c }];
     cell.classList.add("selected");
     return;
   }
 
-  // === CASE 2: second click → try fast-complete ===
   if (selection.length === 1) {
     const start = selection[0];
     const end = { r, c };
 
-    // 1) Try complete whole word instantly
     if (tryFastComplete(start, end)) {
       resetSelection();
       checkCompletion();
       return;
     }
 
-    // 2) If not a first→last pair, continue normal direction mode
     const dir = detectDirection(start, end);
     if (!dir) return resetSelection();
-
     if (!followsDirection(start, end, dir)) return resetSelection();
 
     lockedDirection = dir;
@@ -512,14 +515,12 @@ function handleCellClick(r, c, cell) {
     return;
   }
 
-  // === CASE 3: normal multi-step selecting ===
   if (!followsDirection(selection[0], {r, c}, lockedDirection))
     return resetSelection();
 
   addSelection(r, c, cell);
   checkProgress();
 }
-
 
 function createSparkle(cell) {
   const rect = cell.getBoundingClientRect();
@@ -566,6 +567,7 @@ function resetSelection() {
   selection = [];
   lockedDirection = null;
 }
+
 function tryFastComplete(start, end) {
   for (let w of placedWords) {
     const first = w.coords[0];
@@ -574,14 +576,12 @@ function tryFastComplete(start, end) {
     const firstRev = w.coords[w.coords.length - 1];
     const lastRev = w.coords[0];
 
-    // Forward match
     if (start.r === first.r && start.c === first.c &&
         end.r === last.r && end.c === last.c) {
       markWordFound(w);
       return true;
     }
 
-    // Reverse match
     if (start.r === firstRev.r && start.c === firstRev.c &&
         end.r === lastRev.r && end.c === lastRev.c) {
       markWordFound(w);
@@ -616,6 +616,12 @@ function markWordFound(w) {
   checkCompletion();
 }
 
+function playClickSound() {
+  const snd = document.getElementById("clickSound");
+  snd.currentTime = 0;
+  snd.play().catch(()=>{});
+}
+
 function checkCompletion() {
   if (placedWords.every(w =>
     document.getElementById("word-" + w.word).classList.contains("found")
@@ -623,15 +629,26 @@ function checkCompletion() {
 
     document.getElementById("completionMessage").style.display = "block";
     launchConfetti();
+    playFinishSound();
 
-    /* --- SHOW FAMILY PHOTO ONLY FOR amin-teh --- */
+    function playFinishSound() {
+  const snd = document.getElementById("finishSound");
+  snd.currentTime = 0;
+  snd.play().catch(()=>{});
+}
+
+    const rewardBox = document.getElementById("rewardImageBox");
+    const rewardImage = document.getElementById("rewardImage");
+
     if (currentCategory === "amin-teh") {
-      const fam = document.getElementById("familyImageBox");
-      fam.style.opacity = "1";          // fade in (already has CSS transition)
-    } else {
-      // ensure hidden for all other categories
-      document.getElementById("familyImageBox").style.opacity = "0";
+      rewardImage.src = "family.jpg";
+    } 
+    else {
+      const gifList = ["wa.gif", "wb.gif", "wc.gif", "wd.gif", "we.gif"];
+      rewardImage.src = gifList[Math.floor(Math.random() * gifList.length)];
     }
+
+    rewardBox.style.opacity = "1";
   }
 }
 
