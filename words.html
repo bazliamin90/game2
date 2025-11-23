@@ -28,7 +28,7 @@ h2 {
   gap: 10px;
 }
 
-#startBtn {
+#startBtn, #solveBtn {
   padding: 4px 8px;
   background: #4caf50;
   border: none;
@@ -40,6 +40,16 @@ h2 {
 }
 
 #startBtn:hover { background: #43a047; }
+
+.cell.auto-solved {
+  background: #ff6b6b !important; /* red */
+  color: white !important;
+}
+
+.word-list li.auto-found {
+  color: #ff6b6b;
+  font-weight: bold;
+}
 
 #refreshBtn {
   padding: 4px 8px; 
@@ -203,7 +213,7 @@ h2 {
     margin-bottom: 10px;
   }
 
-  #startBtn {
+  #startBtn, #solveBtn {
     font-size: 12px;
   }
 
@@ -271,6 +281,7 @@ h2 {
   </select>
 
   <button id="startBtn">Start</button>
+  <button id="solveBtn" disabled>Solve</button>
 </div>
 
 <div class="container blurred" id="puzzleContainer">
@@ -291,7 +302,7 @@ h2 {
       text-align:center;
       margin:10px 0;
   ">
-      <img id="rewardImage" src="" style="max-width:250px; border-radius:12px;" />
+      <img id="rewardImage" src="" style="link rel:preload; max-width:250px; border-radius:12px;" />
   </div>
 
   <button id="refreshBtn">Refresh Puzzle</button>
@@ -307,7 +318,7 @@ let placedWords = [];
 let selection = [];
 let lockedDirection = null;
 let targetWord = null;
-let currentCategory = "amin-teh";
+let currentCategory = "amin-teh G1";
 let wordData;
 
 /* -----------------------------
@@ -330,7 +341,7 @@ fetch("words.json")
       dropdown.appendChild(opt);
     });
 
-    dropdown.value = "amin-teh";
+    dropdown.value = "amin-teh G1";
   });
 
 document.getElementById("category").addEventListener("change", function () {
@@ -341,7 +352,6 @@ document.getElementById("category").addEventListener("change", function () {
 function getRandomWordsForCategory(categoryName) {
   const allWords = wordData.categories[categoryName] || [];
 
-  // Shuffle array (copy dulu supaya tak ubah original)
   const shuffled = [...allWords].sort(() => Math.random() - 0.5);
 
   const minCount = 8;
@@ -367,9 +377,22 @@ function getRandomWordsForCategory(categoryName) {
 document.getElementById("startBtn").addEventListener("click", startPuzzle);
 
 function startPuzzle() {
-  currentCategory = document.getElementById("category").value || "amin-teh";
+  currentCategory = document.getElementById("category").value || "amin-teh G1";
 
-  document.getElementById("puzzleContainer").classList.remove("blurred");
+  const puzzleContainer = document.getElementById("puzzleContainer");
+  puzzleContainer.classList.remove("blurred");
+
+  // Enable solve button now
+  const solveBtn = document.getElementById("solveBtn");
+  solveBtn.disabled = false;
+
+  // Hide completion message for new puzzle
+  const completionMsg = document.getElementById("completionMessage");
+  completionMsg.style.display = "none";
+
+  // Reset reward image
+  const rewardBox = document.getElementById("rewardImageBox");
+  rewardBox.style.opacity = "0";
 
   const words = getRandomWordsForCategory(currentCategory);
   newPuzzle(words);
@@ -387,10 +410,40 @@ document.getElementById("refreshBtn").addEventListener("click", () => {
   // reset reward image
   document.getElementById("rewardImageBox").style.opacity = "0";
 
+  // disable solve button again
+  document.getElementById("solveBtn").disabled = true;
+
   const words = getRandomWordsForCategory(currentCategory);
   newPuzzle(words);
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
+
+/* -----------------------------
+   SOLVE BUTTON LOGIC
+------------------------------ */
+
+document.getElementById("solveBtn").addEventListener("click", solveRemainingWords);
+
+function solveRemainingWords() {
+  placedWords.forEach(w => {
+    const li = document.getElementById("word-" + w.word);
+
+    if (li.classList.contains("found")) return; // skip if user already solved
+
+    // mark grid in red
+    w.coords.forEach(({ r, c }) => {
+      const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+      cell.classList.add("auto-solved");
+    });
+
+    // mark word list in red
+    li.classList.add("auto-found");
+  });
+
+  // Do NOT show completion message or play confetti
+  // Disable solve button to prevent repeated clicks
+  document.getElementById("solveBtn").disabled = true;
+}
 
 /* -----------------------------
    PUZZLE GENERATION & LOGIC
@@ -459,9 +512,9 @@ function renderPuzzle() {
       cell.dataset.col = c;
 
       cell.addEventListener("click", () => {
-    playClickSound();
-    handleCellClick(r, c, cell);
-  });
+        playClickSound();
+        handleCellClick(r, c, cell);
+      });
 
       gridDiv.appendChild(cell);
     }
@@ -623,24 +676,31 @@ function playClickSound() {
 }
 
 function checkCompletion() {
-  if (placedWords.every(w =>
-    document.getElementById("word-" + w.word).classList.contains("found")
-  )) {
+  const allSolved =
+    placedWords.every(w =>
+      document.getElementById("word-" + w.word).classList.contains("found") ||
+      document.getElementById("word-" + w.word).classList.contains("auto-found")
+    );
+
+  if (allSolved) {
 
     document.getElementById("completionMessage").style.display = "block";
     launchConfetti();
     playFinishSound();
 
+    // Disable solve button after completion
+    document.getElementById("solveBtn").disabled = true;
+
     function playFinishSound() {
-  const snd = document.getElementById("finishSound");
-  snd.currentTime = 0;
-  snd.play().catch(()=>{});
-}
+      const snd = document.getElementById("finishSound");
+      snd.currentTime = 0;
+      snd.play().catch(()=>{});
+    }
 
     const rewardBox = document.getElementById("rewardImageBox");
     const rewardImage = document.getElementById("rewardImage");
 
-    if (currentCategory === "amin-teh") {
+    if (currentCategory === "amin-teh G1") {
       rewardImage.src = "family.jpg";
     } 
     else {

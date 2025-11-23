@@ -1,9 +1,10 @@
 {
   "categories": {
-    "amin-teh": ["SALIM", "HAFIZUL", "LUQMAN", "MOKHSIN", "AJLA", "SALIMAH", "AMINUDDIN", "HIDAYAH", "FARAH", "ASMATUN", "FAZLI", "SABINA", "HAFIZAH"],
+    "amin-teh G1": ["SALIM", "HAFIZUL", "LUQMAN", "MOKHSIN", "AJLA", "SALIMAH", "AMINUDDIN", "HIDAYAH", "FARAH", "ASMATUN", "FAZLI", "SABINA", "HAFIZAH"],
+    "amin-teh G2": ["DANIAL", "MUAZ", "SOFEA", "MUIZ", "DARWISY", "DHIA", "DAYYAN", "DAFFA", "ALISYA", "AMSYAR", "UMAR", "ORKED", "ROSE", "RAHMAN", "DAHLIA"],
     "animals": ["TIGER", "ELEPHANT", "ZEBRA", "MONKEY", "GIRAFFE", "RABBIT", "PANDA", "DOLPHIN", "KANGAROO", "CROCODILE"],
-    "colors": ["RED", "BLUE", "GREEN", "YELLOW", "PURPLE", "ORANGE", "PINK", "BROWN", "BLACK", "WHITE"],
-    "countries": ["CANADA", "BRAZIL", "FRANCE", "GERMANY", "JAPAN", "INDIA", "CHINA", "RUSSIA", "ITALY", "SPAIN","MALAYSIA"],
+    "colors": ["RED", "BLUE", "GREEN", "YELLOW", "PURPLE", "ORANGE", "PINK", "BROWN", "BLACK", "WHITE", "GRAY"],
+    "countries": ["CANADA", "BRAZIL", "FRANCE", "GERMANY", "JAPAN", "INDIA", "CHINA", "RUSSIA", "ITALY", "SPAIN","MALAYSIA", "PALESTINE"],
     "fruits": ["APPLE", "BANANA", "ORANGE", "PEAR", "MANGO", "GRAPE", "PAPAYA", "LYCHEE", "PEACH", "CHERRY"] 
   }
 }

@@ -20,12 +20,7 @@ headerTemplate3.innerHTML = `
 		backdrop-filter: blur(8px);
 		transition: all 0.3s ease;
 	}
-
-	.header:hover {
-		background: linear-gradient(90deg, #f2e7ff, #e8f3ff);
-	}
-
-	/* === Menu Buttons === */
+	.header:hover { background: linear-gradient(90deg, #f2e7ff, #e8f3ff); }
 	.menu {
 		max-width: 28px;
 		border: 1px solid #ccc;
@@ -35,16 +30,13 @@ headerTemplate3.innerHTML = `
 		cursor: pointer;
 		display: block;
 		object-fit: contain;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 		transition: transform 0.2s ease, box-shadow 0.2s ease;
 	}
-
 	.menu:hover {
 		transform: scale(1.1);
-		box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+		box-shadow: 0 3px 8px rgba(0,0,0,0.2);
 	}
-
-	/* === Title === */
 	h1 {
 		font-family: monospace;
 		font-size: 15px;
@@ -55,22 +47,18 @@ headerTemplate3.innerHTML = `
 		margin: 0;
 		max-width: 50rem;
 	}
-
 	h1 a {
 		text-decoration: none;
 		color: white;
 		background: linear-gradient(135deg, #444, #666);
 		border-radius: 6px;
 		padding: 8px 10px;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+		box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 		transition: background 0.3s ease;
 	}
+	h1 a:hover { background: linear-gradient(135deg, #333, #555); }
 
-	h1 a:hover {
-		background: linear-gradient(135deg, #333, #555);
-	}
-
-	/* === Slide Menu Box === */
+	/* === Scroll Box === */
 	.scroll-box {
 		position: fixed;
 		top: 5vh;
@@ -82,21 +70,31 @@ headerTemplate3.innerHTML = `
 		padding: 14px 10px;
 		background: linear-gradient(180deg, #ffffff, #f8f9ff);
 		overflow-y: auto;
-		-webkit-overflow-scrolling: touch;
+		-webkit-overflow-scrolling: touch; /* momentum scroll */
 		touch-action: pan-y;
-		box-shadow: 4px 0 12px rgba(0, 0, 0, 0.25);
+		box-shadow: 4px 0 12px rgba(0,0,0,0.25);
 		transform: translateX(-110%);
 		transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 		z-index: 1000;
 		border-radius: 0 10px 10px 0;
+		scroll-behavior: smooth;
 	}
+	.scroll-box.visible { transform: translateX(0); }
 
-	.scroll-box.visible {
-		transform: translateX(0);
+	/* Scroll fade top/bottom */
+	.fade-top,
+	.fade-bottom {
+		position: sticky;
+		left: 0;
+		height: 22px;
+		z-index: 10;
+		pointer-events: none;
 	}
+	.fade-top { top: 0; background: linear-gradient(to bottom, rgba(255,255,255,1), rgba(255,255,255,0)); }
+	.fade-bottom { bottom: 0; background: linear-gradient(to top, rgba(255,255,255,1), rgba(255,255,255,0)); }
 
-	/* === Scrollbox Header === */
-	.scroll-box .close-message {
+	/* Close message */
+	.close-message {
 		font-family: monospace;
 		font-size: 10px;
 		color: grey;
@@ -105,8 +103,7 @@ headerTemplate3.innerHTML = `
 		font-style: italic;
 	}
 
-	/* === Search Box === */
-	.scroll-box .search-box {
+	.search-box {
 		width: 92%;
 		padding: 6px;
 		font-family: monospace;
@@ -116,12 +113,8 @@ headerTemplate3.innerHTML = `
 		outline: none;
 		transition: box-shadow 0.2s ease;
 	}
+	.search-box:focus { box-shadow: 0 0 5px #9cbcff; }
 
-	.scroll-box .search-box:focus {
-		box-shadow: 0 0 5px #9cbcff;
-	}
-
-	/* === List Section === */
 	.scroll-box ol {
 		font-family: monospace;
 		margin: 40px 0;
@@ -130,7 +123,6 @@ headerTemplate3.innerHTML = `
 		padding-left: 2.5em;
 		color: #555;
 	}
-
 	.scroll-box ol a {
 		font-family: monospace;
 		text-decoration: underline dotted #ccc;
@@ -138,55 +130,27 @@ headerTemplate3.innerHTML = `
 		color: #333;
 		transition: color 0.2s ease;
 	}
+	.scroll-box ol a:hover { color: #0073e6; }
+	.scroll-box li { font-size: 0.95em; padding-bottom: 10px; }
+	.hrnone { border: 1px solid #f3f3f3; }
 
-	.scroll-box ol a:hover {
-		color: #0073e6;
-	}
-
-	.scroll-box li {
-		font-size: 0.95em;
-		padding-bottom: 10px;
-	}
-
-	ol li {
-		text-align: left;
-	}
-
-	/* === Section Divider === */
-	.hrnone {
-		border: 1px solid #f3f3f3;
-	}
-
-	/* === Overlay Background === */
 	#overlay {
 		position: fixed;
 		top: 0;
 		left: 0;
 		width: 100%;
 		height: 100%;
-		background: rgba(0, 0, 0, 0.6);
+		background: rgba(0,0,0,0.6);
 		opacity: 0;
 		visibility: hidden;
 		transition: opacity 0.3s ease;
 		z-index: 999;
 	}
+	#overlay.visible { opacity: 1; visibility: visible; }
 
-	#overlay.visible {
-		opacity: 1;
-		visibility: visible;
-	}
-
-	/* === Responsive Mobile Adjustment === */
 	@media (max-width: 600px) {
-		.scroll-box {
-			width: 75%;
-			border-right: 3px solid #a599ff;
-			box-shadow: 3px 0 8px rgba(0, 0, 0, 0.2);
-		}
-
-		h1 {
-			font-size: 13px;
-		}
+		.scroll-box { width: 75%; }
+		h1 { font-size: 13px; }
 	}
 </style>
 
@@ -195,9 +159,14 @@ headerTemplate3.innerHTML = `
   <h1><a href="index.html">Bazli's Playschool</a></h1>
   <a href="0003.html"><img src="b.gif" class="menu"></img></a>
 </div>
+
 <div id="overlay"></div>
+
 <div class="scroll-box" id="scroll-box">
+  <div class="fade-top"></div>
+
   <div class="close-message">Click outside this box to close it</div>
+
   <input
     type="text"
     class="search-box"
@@ -205,6 +174,7 @@ headerTemplate3.innerHTML = `
     placeholder="Search..."
     aria-label="Search list items"
   />
+
   <ol id="list">
     <li><a href="index.html">About</a></li>
 	<hr><b>Agama</b><hr class="hrnone">
@@ -226,14 +196,12 @@ headerTemplate3.innerHTML = `
 		<li><a href="abacus.html">Abacus</a></li>
 		<li><a href="rounded.html">Rounding</a></li>
   </ol>
+
+  <div class="fade-bottom"></div>
 </div>
 `;
 
 class Header3 extends HTMLElement {
-	constructor() {
-		super();
-	}
-
 	connectedCallback() {
 		const shadowRoot = this.attachShadow({ mode: 'open' });
 		shadowRoot.appendChild(headerTemplate3.content.cloneNode(true));
@@ -243,75 +211,78 @@ class Header3 extends HTMLElement {
 		const overlay = shadowRoot.querySelector('#overlay');
 		const searchBox = shadowRoot.querySelector('#search-box');
 		const list = shadowRoot.querySelector('#list');
+		const fadeTop = shadowRoot.querySelector('.fade-top');
+		const fadeBottom = shadowRoot.querySelector('.fade-bottom');
 
-		let preventTouchScroll = (e) => e.preventDefault();
+		/* === TOUCH SCROLL BLOCKER === */
+		let blockBackgroundScroll = (e) => {
+			if (!scrollBox.contains(e.target)) e.preventDefault();
+		};
 
-		menu.addEventListener('click', (event) => {
-			event.stopPropagation();
-			toggleScrollBox(scrollBox, overlay);
-		});
+		/* === Menu click toggle === */
+		menu.addEventListener('click', (e) => { e.stopPropagation(); toggleScrollBox(); });
 
-		document.addEventListener('click', function (event) {
+		/* === Stop clicks inside scrollBox from closing === */
+		scrollBox.addEventListener('click', (e) => e.stopPropagation());
+		searchBox.addEventListener('click', (e) => e.stopPropagation());
+
+		/* === Overlay click closes === */
+		overlay.addEventListener('click', hideScrollBox);
+
+		/* === Document click closes if outside === */
+		document.addEventListener('click', (e) => {
+			const path = e.composedPath();
 			if (
 				scrollBox.classList.contains('visible') &&
-				!scrollBox.contains(event.target) &&
-				!event.target.matches('.menu')
+				!path.includes(scrollBox) &&
+				!path.some(el => el.classList && el.classList.contains('menu'))
 			) {
-				hideScrollBox(scrollBox, overlay);
+				hideScrollBox();
 			}
 		});
 
-		scrollBox.addEventListener('click', (event) => {
-			event.stopPropagation();
-		});
-
-		overlay.addEventListener('click', () => hideScrollBox(scrollBox, overlay));
-
-		function toggleScrollBox(scrollBox, overlay) {
-			if (scrollBox.classList.contains('visible')) {
-				hideScrollBox(scrollBox, overlay);
-			} else {
-				showScrollBox(scrollBox, overlay);
-			}
+		function toggleScrollBox() {
+			scrollBox.classList.contains('visible') ? hideScrollBox() : showScrollBox();
 		}
 
-		function showScrollBox(scrollBox, overlay) {
-  scrollBox.classList.add('visible');
-  overlay.classList.add('visible');
+		function showScrollBox() {
+			scrollBox.classList.add('visible');
+			overlay.classList.add('visible');
 
-  // Disable background scrolling
-  const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
-  document.body.style.overflow = 'hidden';
-  document.body.style.paddingRight = `${scrollBarWidth}px`;
+			const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+			document.body.style.overflow = 'hidden';
+			document.body.style.paddingRight = `${scrollBarWidth}px`;
 
-  // Allow scrolling inside the scroll box only
-  document.addEventListener('touchmove', function allowScrollBox(e) {
-    if (!scrollBox.contains(e.target)) {
-      e.preventDefault();
-    }
-  }, { passive: false });
-}
+			document.addEventListener('touchmove', blockBackgroundScroll, { passive: false });
+			updateFadeShadows();
+		}
 
-		function hideScrollBox(scrollBox, overlay) {
+		function hideScrollBox() {
 			scrollBox.classList.remove('visible');
 			overlay.classList.remove('visible');
 
-			// Re-enable background scrolling
 			document.body.style.overflow = '';
 			document.body.style.paddingRight = '';
 
-			document.removeEventListener('touchmove', preventTouchScroll);
+			document.removeEventListener('touchmove', blockBackgroundScroll);
 		}
 
-		// Simplified search functionality
+		/* === Scroll fade top/bottom === */
+		scrollBox.addEventListener('scroll', updateFadeShadows);
+		function updateFadeShadows() {
+			const atTop = scrollBox.scrollTop <= 5;
+			const atBottom = scrollBox.scrollHeight - scrollBox.clientHeight - scrollBox.scrollTop <= 5;
+			fadeTop.style.opacity = atTop ? "0" : "1";
+			fadeBottom.style.opacity = atBottom ? "0" : "1";
+		}
+
+		/* === Search Filtering === */
 		searchBox.addEventListener('input', () => {
 			const filter = searchBox.value.toLowerCase();
 			list.querySelectorAll('li').forEach(li => {
 				li.style.display = li.textContent.toLowerCase().includes(filter) ? '' : 'none';
 			});
-			list.querySelectorAll('b, hr').forEach(el => {
-				el.style.display = filter ? 'none' : '';
-			});
+			list.querySelectorAll('b, hr').forEach(el => { el.style.display = filter ? 'none' : ''; });
 		});
 	}
 }
