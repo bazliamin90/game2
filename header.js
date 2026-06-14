@@ -242,6 +242,7 @@ h1 a:hover {
         <li><a href="maths1-1.html">Tambah</a></li>
         <li><a href="maths2-1.html">Tolak</a></li>
         <li><a href="0002.html">Darab</a></li>
+        <li><a href="0005.html">Bahagi</a></li>
         <li><a href="jam.html">Teka Jam</a></li>
         <li><a href="abacus.html">Abacus</a></li>
         <li><a href="rounded.html">Rounding</a></li>

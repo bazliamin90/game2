@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="header.js"></script>
+    <title>Division Visualizer</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --background: #f8fafc;
+            --text: #0f172a;
+            --border: #cbd5e1;
+        }
+
+        body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0 auto;
+      overflow-y: scroll;
+    }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1rem auto;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            max-width: 90%;
+        }
+
+        input {
+            width: 70px;
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* Long Division Layout Grid */
+        .division-container {
+            display: inline-grid;
+            grid-template-columns: auto auto;
+            gap: 0;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 2rem;
+            max-width: 90%;
+        }
+
+        .divisor {
+            padding: 0.2rem 0.5rem;
+            text-align: right;
+            grid-column: 1;
+            grid-row: 2;
+            align-self: end;
+        }
+
+        .quotient {
+            padding: 0.2rem 0.5rem;
+            grid-column: 2;
+            grid-row: 1;
+            text-align: left;
+            letter-spacing: 0.5rem;
+        }
+
+        .work-area {
+            grid-column: 2;
+            grid-row: 2;
+            border-top: 4px solid var(--text);
+            border-left: 4px solid var(--text);
+            border-top-left-radius: 12px 100%;
+            padding: 0.2rem 0.5rem;
+            text-align: left;
+            line-height: 1.4;
+            letter-spacing: 0.5rem;
+            white-space: pre;
+        }
+    </style>
+</head>
+<body>
+<header3-component></header3-component>
+    <h1>Division Visualizer</h1>
+
+    <div class="controls">
+        <input type="number" id="dividend" value="475" min="1" placeholder="Dividend">
+        <span>÷</span>
+        <input type="number" id="divisor" value="12" min="1" placeholder="Divisor">
+        <button onclick="calculateLongDivision()">Divide</button>
+    </div>
+
+    <div class="division-container" id="outputContainer" style="display: none;">
+        <div class="quotient" id="displayQuotient"></div>
+        <div class="divisor" id="displayDivisor"></div>
+        <div class="work-area" id="displayWork"></div>
+    </div>
+
+    <script>
+        function calculateLongDivision() {
+            const dividendInput = document.getElementById('dividend').value;
+            const divisorInput = document.getElementById('divisor').value;
+            
+            const dividendStr = dividendInput.toString().trim();
+            const divisor = parseInt(divisorInput, 10);
+            
+            if (!dividendStr || isNaN(divisor) || divisor <= 0) {
+                alert("Please enter valid positive numbers.");
+                return;
+            }
+
+            let quotientStr = "";
+            let currentNumberStr = "";
+            let stepsHTML = "";
+            
+            // Loop through each digit of the dividend
+            for (let i = 0; i < dividendStr.length; i++) {
+                const currentDigit = dividendStr[i];
+                currentNumberStr += currentDigit;
+                let currentVal = parseInt(currentNumberStr, 10);
+                
+                // Pad left tracking space to visually align columns
+                const spaces = " ".repeat(i);
+
+                if (i === 0) {
+                    // Start by writing down the base dividend row
+                    stepsHTML += `${currentDigit}`;
+                } else {
+                    stepsHTML += `${currentDigit}`;
+                }
+
+                if (currentVal >= divisor) {
+                    const localQuotient = Math.floor(currentVal / divisor);
+                    const product = localQuotient * divisor;
+                    const remainder = currentVal % divisor;
+                    
+                    quotientStr += localQuotient;
+                    
+                    // Match visual padding based on length differences
+                    const productPadding = " ".repeat(i - (product.toString().length - 1));
+                    const remainderPadding = " ".repeat(i - (remainder.toString().length - 1));
+                    
+                    stepsHTML += `\n${productPadding}-${product}\n${productPadding}${"-".repeat(product.toString().length)}`;
+                    
+                    currentNumberStr = remainder.toString();
+                    
+                    // Avoid appending intermediate zeroes if there is a remainder coming up next
+                    if (i < dividendStr.length - 1) {
+                        stepsHTML += `\n${remainderPadding}${remainder}`;
+                        if(currentNumberStr === "0") {
+                            currentNumberStr = "";
+                        }
+                    } else {
+                        stepsHTML += `\n${remainderPadding}${remainder}  (R)`;
+                    }
+                } else {
+                    // The step value cannot be divided yet
+                    quotientStr += "0";
+                    if (i === dividendStr.length - 1) {
+                        const finalRemPadding = " ".repeat(dividendStr.length - currentVal.toString().length);
+                        stepsHTML += `\n\n${finalRemPadding}${currentVal}  (R)`;
+                    }
+                }
+            }
+
+            // Clean up leading zeros in quotient string display
+            let finalQuotient = quotientStr.replace(/^0+/, '');
+            if (finalQuotient === "") finalQuotient = "0";
+
+            // Render output fields to browser
+            document.getElementById('displayQuotient').innerText = finalQuotient;
+            document.getElementById('displayDivisor').innerText = divisor;
+            document.getElementById('displayWork').innerText = stepsHTML;
+            document.getElementById('outputContainer').style.display = 'inline-grid';
+        }
+    </script>
+</body>
+</html>
