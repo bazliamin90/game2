@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Long Division Calculator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Nunito:wght@400;600;700;800;900&display=swap');
+
+  :root {
+    --bg: #f0f4ff;
+    --surface: #ffffff;
+    --primary: #4361ee;
+    --primary-light: #eef0fd;
+    --accent: #f72585;
+    --green: #06d6a0;
+    --yellow: #ffd166;
+    --text: #1a1a2e;
+    --muted: #7b8db0;
+    --border: #d8e0f5;
+    --step-bg: #f8f9ff;
+    --shadow: 0 4px 24px rgba(67,97,238,0.10);
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 50px;
+    padding: 8px 20px 8px 12px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    margin-bottom: 18px;
+  }
+  .logo svg { width:22px; height:22px; }
+
+  h1 {
+    font-size: clamp(26px, 5vw, 40px);
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1.15;
+  }
+  h1 span { color: var(--primary); }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 16px;
+    margin-top: 8px;
+  }
+
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px;
+    max-width: 680px;
+    margin: 0 auto 24px;
+  }
+
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .input-group label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+
+  .num-input {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 500;
+    width: 140px;
+    padding: 10px 14px;
+    border: 2.5px solid var(--border);
+    border-radius: 12px;
+    text-align: center;
+    outline: none;
+    background: var(--step-bg);
+    color: var(--text);
+    transition: border-color .2s;
+    -moz-appearance: textfield;
+  }
+  .num-input::-webkit-inner-spin-button,
+  .num-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .num-input:focus { border-color: var(--primary); background: var(--primary-light); }
+
+  .div-symbol {
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--primary);
+    padding-top: 24px;
+  }
+
+  .options-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .toggle-group {
+    display: flex;
+    background: var(--step-bg);
+    border-radius: 50px;
+    padding: 4px;
+    border: 2px solid var(--border);
+  }
+
+  .toggle-btn {
+    padding: 7px 16px;
+    border-radius: 50px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    transition: all .2s;
+  }
+  .toggle-btn.active {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  .precision-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+  .precision-row input[type=range] {
+    accent-color: var(--primary);
+    width: 80px;
+  }
+  .precision-val {
+    background: var(--primary-light);
+    color: var(--primary);
+    font-weight: 800;
+    border-radius: 8px;
+    padding: 2px 8px;
+    font-size: 13px;
+  }
+
+  .btn-calc {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+    padding: 14px 0;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    cursor: pointer;
+    letter-spacing: .5px;
+    box-shadow: 0 4px 16px rgba(67,97,238,.25);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .btn-calc:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(67,97,238,.35); }
+  .btn-calc:active { transform: translateY(0); }
+
+  /* Result area */
+  #result-area { max-width: 680px; margin: 0 auto; }
+
+  .result-summary {
+    background: linear-gradient(135deg, var(--primary) 0%, #7b2ff7 100%);
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 22px 28px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    box-shadow: 0 6px 24px rgba(67,97,238,.25);
+  }
+
+  .result-summary .res-eq {
+    font-size: clamp(18px,4vw,26px);
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+  }
+
+  .result-summary .badge {
+    background: rgba(255,255,255,.2);
+    border-radius: 50px;
+    padding: 5px 14px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  /* Long division display */
+  .division-box {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+  }
+
+  .division-box h2 {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+  }
+
+  /* The actual long division layout */
+  .ld-container {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(16px, 3vw, 22px);
+    display: inline-block;
+    min-width: 220px;
+    position: relative;
+  }
+
+  .ld-header {
+    display: flex;
+    align-items: stretch;
+  }
+
+  .ld-divisor {
+    padding-right: 14px;
+    border-right: 3px solid var(--text);
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  .ld-right {
+    display: flex;
+    flex-direction: column;
+    border-top: 3px solid var(--text);
+    padding-left: 10px;
+  }
+
+  .ld-quotient {
+    color: var(--primary);
+    font-weight: 700;
+    padding-bottom: 6px;
+    letter-spacing: 2px;
+  }
+
+  .ld-dividend-row {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* Steps table */
+  .ld-steps {
+    margin-top: 10px;
+    padding-left: 10px;
+  }
+
+  .ld-step-row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 2px;
+  }
+
+  .ld-mul {
+    color: var(--accent);
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+  }
+
+  .ld-rem {
+    border-top: 2px solid var(--muted);
+    color: var(--green);
+    font-weight: 700;
+  }
+
+  .ld-bring {
+    color: var(--text);
+    opacity: .6;
+    font-style: italic;
+    font-size: .85em;
+  }
+
+  /* Step-by-step explanation */
+  .steps-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+
+  .steps-card h2 {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+  }
+
+  .step-item {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    animation: fadeIn .3s ease both;
+  }
+  .step-item:last-child { border-bottom: none; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .step-num {
+    flex-shrink: 0;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 800;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .step-content { flex: 1; }
+
+  .step-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+
+  .step-desc {
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .step-calc {
+    display: inline-block;
+    margin-top: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    background: var(--step-bg);
+    border-left: 3px solid var(--primary);
+    padding: 6px 12px;
+    border-radius: 0 8px 8px 0;
+    color: var(--text);
+  }
+
+  .highlight-q { color: var(--primary); font-weight: 700; }
+  .highlight-m { color: var(--accent); font-weight: 700; }
+  .highlight-r { color: var(--green); font-weight: 700; }
+  .highlight-b { color: #ff9500; font-weight: 700; }
+
+  /* Error */
+  .error-msg {
+    background: #fff0f3;
+    color: var(--accent);
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 20px;
+    border: 2px solid #ffd6e0;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 700; color: var(--muted);
+  }
+  .legend-dot {
+    width: 12px; height: 12px; border-radius: 3px;
+  }
+
+  .hidden { display: none !important; }
+
+  /* Responsive */
+  @media(max-width:480px) {
+    .input-row { gap: 8px; }
+    .num-input { width: 110px; font-size: 22px; }
+    .division-box { padding: 18px; }
+    .ld-container { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <circle cx="12" cy="7" r="2"/><line x1="4" y1="12" x2="20" y2="12"/>
+      <circle cx="12" cy="17" r="2"/>
+    </svg>
+    Learn Division
+  </div>
+  <h1>Long Division <span>Calculator</span></h1>
+  <p class="subtitle">See every step, learn how it works</p>
+</header>
+
+<div class="card">
+  <div class="input-row">
+    <div class="input-group">
+      <label>Dividend</label>
+      <input class="num-input" id="dividend" type="number" value="432" min="-999999" max="999999" placeholder="e.g. 432">
+    </div>
+    <div class="div-symbol">÷</div>
+    <div class="input-group">
+      <label>Divisor</label>
+      <input class="num-input" id="divisor" type="number" value="3" placeholder="e.g. 3">
+    </div>
+  </div>
+
+  <div class="options-row">
+    <div class="toggle-group">
+      <button class="toggle-btn active" id="btn-normal" onclick="setMode('normal')">Quotient</button>
+      <button class="toggle-btn" id="btn-remainder" onclick="setMode('remainder')">With Remainder</button>
+    </div>
+    <div class="precision-row" id="precision-row">
+      <span>Decimals:</span>
+      <input type="range" id="precision" min="0" max="8" value="4" oninput="document.getElementById('prec-val').textContent=this.value">
+      <span class="precision-val" id="prec-val">4</span>
+    </div>
+  </div>
+
+  <button class="btn-calc" onclick="calculate()">Calculate ÷ Show Steps</button>
+</div>
+
+<div id="result-area"></div>
+
+<script>
+let mode = 'normal';
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('btn-normal').classList.toggle('active', m === 'normal');
+  document.getElementById('btn-remainder').classList.toggle('active', m === 'remainder');
+  document.getElementById('precision-row').classList.toggle('hidden', m === 'remainder');
+}
+
+function calculate() {
+  const dividendRaw = parseFloat(document.getElementById('dividend').value);
+  const divisorRaw  = parseFloat(document.getElementById('divisor').value);
+  const precision   = parseInt(document.getElementById('precision').value);
+  const area = document.getElementById('result-area');
+
+  if (isNaN(dividendRaw) || isNaN(divisorRaw)) {
+    area.innerHTML = `<div class="error-msg">⚠️ Please enter valid numbers in both fields.</div>`;
+    return;
+  }
+  if (divisorRaw === 0) {
+    area.innerHTML = `<div class="error-msg">⚠️ Cannot divide by zero.</div>`;
+    return;
+  }
+
+  // Work with integers (handle negatives)
+  const signDividend = dividendRaw < 0 ? -1 : 1;
+  const signDivisor  = divisorRaw  < 0 ? -1 : 1;
+  const resultSign   = signDividend * signDivisor;
+  const dividend = Math.abs(Math.round(dividendRaw));
+  const divisor  = Math.abs(Math.round(divisorRaw));
+
+  if (mode === 'remainder') {
+    buildRemainder(dividend, divisor, dividendRaw < 0, divisorRaw < 0, resultSign, area);
+  } else {
+    buildLongDiv(dividend, divisor, precision, dividendRaw < 0, divisorRaw < 0, resultSign, area);
+  }
+}
+
+function buildRemainder(dividend, divisor, negA, negB, sign, area) {
+  const quotient  = Math.floor(dividend / divisor);
+  const remainder = dividend % divisor;
+  const signedQ   = sign * quotient;
+
+  const summaryHtml = `
+    <div class="result-summary">
+      <div class="res-eq">
+        ${negA ? '-' : ''}${dividend} ÷ ${negB ? '-' : ''}${divisor}
+        = <strong>${signedQ}</strong> remainder <strong>${sign < 0 ? -remainder : remainder}</strong>
+      </div>
+      <span class="badge">Remainder mode</span>
+    </div>`;
+
+  const steps = buildRemainderSteps(dividend, divisor, negA, negB, sign);
+
+  area.innerHTML = summaryHtml + steps;
+}
+
+function buildRemainderSteps(dividend, divisor, negA, negB, sign) {
+  const q = Math.floor(dividend / divisor);
+  const r = dividend % divisor;
+  const signedQ = sign * q;
+  const signedR = (sign < 0 ? -r : r);
+
+  let html = `<div class="steps-card">
+    <h2>📋 Step-by-step explanation</h2>`;
+
+  let stepN = 1;
+
+  html += step(stepN++, 'Write the problem',
+    `We want to find how many times <span class="highlight-m">${negB?'-':''}${divisor}</span> fits into <span class="highlight-b">${negA?'-':''}${dividend}</span>.`,
+    `${negA?'-':''}${dividend} ÷ ${negB?'-':''}${divisor} = ?`
+  );
+
+  html += step(stepN++, 'Find the quotient',
+    `Ask: <em>how many times does <span class="highlight-m">${divisor}</span> go into <span class="highlight-b">${dividend}</span> exactly?</em> <br>
+    <span class="highlight-m">${divisor}</span> × <span class="highlight-q">${q}</span> = <span class="highlight-m">${divisor * q}</span>`,
+    `${q} × ${divisor} = ${q * divisor}`
+  );
+
+  html += step(stepN++, 'Find the remainder',
+    `Subtract: <span class="highlight-b">${dividend}</span> − <span class="highlight-m">${q * divisor}</span> = <span class="highlight-r">${r}</span>. This leftover is the remainder.`,
+    `${dividend} − ${q * divisor} = ${r}`
+  );
+
+  if (sign < 0 || negA) {
+    html += step(stepN++, 'Apply the sign',
+      `Since one or both numbers are negative, the quotient is <span class="highlight-q">${signedQ}</span>.`,
+      `Sign of quotient: ${sign > 0 ? 'positive' : 'negative'}`
+    );
+  }
+
+  html += step(stepN++, 'Write the answer',
+    `<span class="highlight-b">${negA?'-':''}${dividend}</span> ÷ <span class="highlight-m">${negB?'-':''}${divisor}</span> = <span class="highlight-q">${signedQ}</span> with remainder <span class="highlight-r">${signedR}</span>`,
+    `Check: (${signedQ} × ${negB?'-':''}${divisor}) + ${signedR} = ${(signedQ * (negB?-1:1) * divisor) + signedR} ✓`
+  );
+
+  html += `</div>`;
+  return html;
+}
+
+function buildLongDiv(dividend, divisor, precision, negA, negB, sign, area) {
+  // Run the algorithm and collect steps
+  const steps = [];
+  let dividendStr = String(dividend);
+  let currentNum = 0;
+  let quotientDigits = [];
+  let i = 0;
+  let decimalPhase = false;
+  let decimalCount = 0;
+  let decimalInsertPos = -1;
+  let bringDownHistory = '';
+
+  while (i < dividendStr.length || (decimalCount < precision && currentNum !== 0)) {
+    let brought = '';
+    if (i < dividendStr.length) {
+      brought = dividendStr[i];
+      currentNum = currentNum * 10 + parseInt(dividendStr[i]);
+      bringDownHistory += brought;
+      i++;
+    } else {
+      if (!decimalPhase) {
+        decimalPhase = true;
+        decimalInsertPos = quotientDigits.length;
+      }
+      brought = '0';
+      currentNum = currentNum * 10;
+      bringDownHistory += '0';
+      decimalCount++;
+    }
+
+    const qd = Math.floor(currentNum / divisor);
+    const product = qd * divisor;
+    const remainder = currentNum - product;
+
+    steps.push({
+      bringDownDigit: brought,
+      currentNum: currentNum,
+      quotientDigit: qd,
+      product: product,
+      remainder: remainder,
+      decimalPhase: decimalPhase
+    });
+
+    quotientDigits.push(qd);
+    currentNum = remainder;
+
+    if (decimalPhase && currentNum === 0) break;
+  }
+
+  // Format quotient
+  let quotientStr = quotientDigits.join('');
+  if (decimalInsertPos >= 0 && decimalInsertPos < quotientStr.length) {
+    quotientStr = quotientStr.slice(0, decimalInsertPos) + '.' + quotientStr.slice(decimalInsertPos);
+  }
+  if (quotientDigits.length === 0) quotientStr = '0';
+
+  const displayDividend = (negA ? '-' : '') + dividend;
+  const displayDivisor  = (negB ? '-' : '') + divisor;
+  const displayQuotient = (sign < 0 ? '-' : '') + quotientStr;
+  const finalRemainder  = currentNum;
+
+  // Summary
+  let summaryExtra = '';
+  if (finalRemainder > 0 && decimalCount < precision) summaryExtra = ` remainder ${finalRemainder}`;
+  const summaryHtml = `
+    <div class="result-summary">
+      <div class="res-eq">
+        ${displayDividend} ÷ ${displayDivisor} = <strong>${displayQuotient}</strong>${summaryExtra}
+      </div>
+      <span class="badge">Long Division</span>
+    </div>`;
+
+  // Long division graphic
+  const ldHtml = buildLDGraphic(dividend, divisor, quotientStr, decimalInsertPos, steps, negA, negB, sign);
+
+  // Step explanation
+  const stepsHtml = buildLDSteps(dividend, divisor, steps, negA, negB, sign, quotientStr, decimalInsertPos);
+
+  area.innerHTML = summaryHtml + ldHtml + stepsHtml;
+}
+
+function buildLDGraphic(dividend, divisor, quotientStr, decimalInsertPos, steps, negA, negB, sign) {
+  // Build the vertical long division notation
+  const displayDividend = (negA ? '-' : '') + dividend;
+  const displayDivisor  = (negB ? '-' : '') + divisor;
+  const displayQuotient = (sign < 0 ? '-' : '') + quotientStr;
+
+  let rows = [];
+  // We'll show: dividend at top, then for each step: product (underlined), remainder, then bring down next digit
+  let runningStr = '';
+  let padLeft = 0;
+
+  for (let i = 0; i < steps.length; i++) {
+    const s = steps[i];
+    rows.push({
+      current: s.currentNum,
+      product: s.product,
+      remainder: s.remainder,
+      bringDown: s.bringDownDigit,
+      qd: s.quotientDigit,
+      padLeft: padLeft,
+    });
+    padLeft++;
+  }
+
+  // Simple ASCII-style visual in monospaced HTML
+  let html = `<div class="division-box">
+    <h2>📐 Division Layout</h2>
+    <div style="overflow-x:auto">
+    <table class="ld-container" style="border-collapse:collapse;line-height:1.8">`;
+
+  // ROW 0: Quotient ABOVE everything (spanning full width)
+html += `
+<tr>
+  <td colspan="2" style="
+    text-align:right;
+    padding-bottom:6px;
+    color:var(--primary);
+    font-weight:700;
+    letter-spacing:2px;
+  ">
+    ${displayQuotient}
+  </td>
+</tr>`;
+
+html += `
+<tr>
+  <td style="
+    padding-right:14px;
+    border-right:3px solid var(--text);
+    color:var(--accent);
+    font-weight:700;
+  ">
+    ${displayDivisor}
+  </td>
+
+  <td style="
+    padding-left:10px;
+    border-top:3px solid var(--text);
+    font-weight:500;
+  ">
+    ${displayDividend}
+  </td>
+</tr>`;
+
+  // Subsequent rows: product, remainder/bring-down
+  let padStr = '';
+  for (let i = 0; i < steps.length; i++) {
+    const s = steps[i];
+    const product = (s.product === 0 ? '' : s.product);
+    const rem = s.remainder;
+
+    // product row
+    html += `<tr>
+      <td style="padding-right:14px;border-right:3px solid var(--text)"></td>
+      <td style="padding-left:10px;color:var(--accent);">${' '.repeat(i)}<span style="text-decoration:underline dotted 2px;text-underline-offset:2px">${(s.product)}</span></td>
+    </tr>`;
+    // remainder row
+    const remDisplay = rem === 0 ? '0' : rem;
+    const isLast = i === steps.length - 1;
+    html += `<tr>
+      <td style="padding-right:14px;border-right:3px solid var(--text)"></td>
+      <td style="padding-left:10px;color:${isLast ? 'var(--green)' : 'var(--text)'};font-weight:${isLast?'700':'400'}">${' '.repeat(i)}${remDisplay}</td>
+    </tr>`;
+  }
+
+  html += `</table></div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--primary)"></div> Quotient</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> Multiply/Subtract</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Remainder</div>
+    </div>
+  </div>`;
+
+  return html;
+}
+
+function buildLDSteps(dividend, divisor, steps, negA, negB, sign, quotientStr, decimalInsertPos) {
+  const displayDividend = (negA ? '-' : '') + dividend;
+  const displayDivisor  = (negB ? '-' : '') + divisor;
+  const displayQuotient = (sign < 0 ? '-' : '') + quotientStr;
+  const dividendStr = String(dividend);
+
+  let html = `<div class="steps-card"><h2>📋 Step-by-step explanation</h2>`;
+
+  let n = 1;
+
+  html += step(n++, 'Set up the problem',
+    `Write <span class="highlight-b">${displayDividend}</span> (dividend) under the division bar, and <span class="highlight-m">${displayDivisor}</span> (divisor) to the left.`,
+    `${displayDividend} ÷ ${displayDivisor}`
+  );
+
+  let prefix = '';
+  for (let i = 0; i < steps.length; i++) {
+    const s = steps[i];
+    const isFirst = i === 0;
+    const isLast  = i === steps.length - 1;
+
+    if (s.decimalPhase && i > 0 && !steps[i-1].decimalPhase) {
+      html += step(n++, 'Start decimal part',
+        `The remainder <span class="highlight-r">${steps[i-1].remainder}</span> is smaller than the divisor <span class="highlight-m">${divisor}</span>. We add a decimal point to the quotient and bring down a <span class="highlight-b">0</span>.`,
+        `Quotient so far: ${quotientStr.slice(0, decimalInsertPos)}.`
+      );
+    }
+
+    const bringVerb = isFirst ? 'Look at' : 'Bring down';
+    const bringNote = isFirst
+      ? `We start with the first digit(s) of <span class="highlight-b">${displayDividend}</span>: <span class="highlight-b">${s.currentNum}</span>.`
+      : `Bring down the next digit (<span class="highlight-b">${s.bringDownDigit}</span>) to get <span class="highlight-b">${s.currentNum}</span>.`;
+
+    html += step(n++, `${bringVerb} the digits`,
+      bringNote,
+      `Current working number: ${s.currentNum}`
+    );
+
+    html += step(n++, `Divide ${s.currentNum} ÷ ${divisor}`,
+      `How many times does <span class="highlight-m">${divisor}</span> go into <span class="highlight-b">${s.currentNum}</span>? → <span class="highlight-q">${s.quotientDigit}</span> times. Write <span class="highlight-q">${s.quotientDigit}</span> in the quotient.`,
+      `⌊${s.currentNum} ÷ ${divisor}⌋ = ${s.quotientDigit}`
+    );
+
+    html += step(n++, `Multiply ${s.quotientDigit} × ${divisor}`,
+      `Multiply: <span class="highlight-q">${s.quotientDigit}</span> × <span class="highlight-m">${divisor}</span> = <span class="highlight-m">${s.product}</span>. Write this below <span class="highlight-b">${s.currentNum}</span>.`,
+      `${s.quotientDigit} × ${divisor} = ${s.product}`
+    );
+
+    html += step(n++, `Subtract ${s.currentNum} − ${s.product}`,
+      `Subtract: <span class="highlight-b">${s.currentNum}</span> − <span class="highlight-m">${s.product}</span> = <span class="highlight-r">${s.remainder}</span>. This is the new remainder.`,
+      `${s.currentNum} − ${s.product} = ${s.remainder}`
+    );
+  }
+
+  const finalRem = steps[steps.length - 1].remainder;
+  html += step(n++, 'Final answer',
+    `All digits have been processed. The quotient is <span class="highlight-q">${displayQuotient}</span>${finalRem > 0 ? ` with remainder <span class="highlight-r">${finalRem}</span>` : ', with no remainder (exact division)'}.`,
+    `${displayDividend} ÷ ${displayDivisor} = ${displayQuotient}${finalRem > 0 ? ' r' + finalRem : ''} ✓`
+  );
+
+  html += `</div>`;
+  return html;
+}
+
+function step(num, title, desc, calc) {
+  return `<div class="step-item" style="animation-delay:${(num - 1) * 60}ms">
+    <div class="step-num">${num}</div>
+    <div class="step-content">
+      <div class="step-title">${title}</div>
+      <div class="step-desc">${desc}</div>
+      ${calc ? `<div class="step-calc">${calc}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+// Trigger on Enter
+document.getElementById('dividend').addEventListener('keydown', e => { if(e.key==='Enter') calculate(); });
+document.getElementById('divisor').addEventListener('keydown',  e => { if(e.key==='Enter') calculate(); });
+
+// Auto-calculate on load
+window.addEventListener('DOMContentLoaded', calculate);
+</script>
+</body>
+</html>
