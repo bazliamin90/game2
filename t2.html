@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Long Division</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #1a1f2e;
+    --surface: #232838;
+    --border: #2e3548;
+    --quotient: #f0c040;
+    --product: #e05a5a;
+    --remainder-color: #5ac8e0;
+    --text: #d4daf0;
+    --muted: #7080a0;
+    --step-active: #4c5fcf;
+    --green: #5adb8a;
+    --cell-size: 52px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px 64px;
+  }
+
+  h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+
+  /* ── Input panel ── */
+  .input-panel {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .input-panel label { font-size: 0.82rem; color: var(--muted); margin-right: 4px; }
+
+  .num-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 600;
+    width: 110px;
+    padding: 10px 14px;
+    text-align: center;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .num-input:focus { border-color: var(--step-active); }
+
+  .divide-sym {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.4rem;
+    color: var(--muted);
+  }
+
+  .btn {
+    background: var(--step-active);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 11px 22px;
+    cursor: pointer;
+    transition: opacity .2s, transform .1s;
+  }
+  .btn:hover { opacity: .88; }
+  .btn:active { transform: scale(.97); }
+  .btn.secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .btn.secondary:hover { border-color: var(--text); color: var(--text); }
+
+  /* ── Main layout ── */
+  .main {
+    display: flex;
+    gap: 48px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    max-width: 860px;
+  }
+
+  /* ── Division grid ── */
+  .division-wrap { position: relative; }
+
+  .grid-table {
+    border-collapse: collapse;
+  }
+  .grid-table td {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    text-align: center;
+    vertical-align: middle;
+    position: relative;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: transparent;
+    transition: color .35s ease;
+  }
+  .grid-table td.show { color: var(--text); }
+  .grid-table td.quotient.show { color: var(--quotient); }
+  .grid-table td.product.show { color: var(--product); }
+  .grid-table td.remainder-digit.show { color: var(--remainder-color); }
+
+  /* divisor box */
+  .divisor-box {
+    border-right: 3px solid var(--text);
+    border-top: 3px solid var(--text);
+  }
+  /* subtraction line */
+  .sub-line td { border-bottom: 2px solid var(--muted); }
+
+  /* minus sign column */
+  .minus-cell {
+    color: var(--muted) !important;
+    font-size: 1.5rem;
+    padding-right: 2px;
+  }
+
+  /* ── Step panel ── */
+  .step-panel {
+    min-width: 260px;
+    max-width: 340px;
+    flex: 1;
+  }
+
+  .step-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .step-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+  .step-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .4s ease, transform .4s ease, border-color .3s;
+  }
+  .step-item.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .step-item.active { border-color: var(--step-active); }
+
+  .step-item .eq { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+  .step-item .q  { color: var(--quotient); }
+  .step-item .p  { color: var(--product); }
+  .step-item .r  { color: var(--remainder-color); }
+
+  /* ── Check & Answer ── */
+  .result-box {
+    margin-top: 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 22px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .5s ease, transform .5s ease;
+  }
+  .result-box.visible { opacity: 1; transform: translateY(0); }
+  .result-box .check-label {
+    font-size: 0.75rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .result-box .check-eq {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .result-box .answer {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--green);
+  }
+
+  /* ── Controls ── */
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+
+  /* ── Error ── */
+  .error-msg {
+    color: var(--product);
+    font-size: 0.85rem;
+    margin-top: 8px;
+    min-height: 20px;
+    text-align: center;
+  }
+
+  @media (max-width: 600px) {
+    :root { --cell-size: 40px; }
+    .grid-table td { font-size: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Long Division</h1>
+
+<div class="input-panel">
+  <label>Dividend</label>
+  <input class="num-input" id="dividend" type="number" min="1" max="999999" value="3476">
+  <span class="divide-sym">÷</span>
+  <label>Divisor</label>
+  <input class="num-input" id="divisor" type="number" min="1" max="999" value="7">
+  <button class="btn" onclick="startDivision()">Calculate</button>
+</div>
+<div class="error-msg" id="errorMsg"></div>
+
+<div class="main" id="mainArea" style="display:none">
+  <div class="division-wrap">
+    <table class="grid-table" id="divGrid"></table>
+  </div>
+  <div class="step-panel">
+    <div class="step-title">Steps</div>
+    <ul class="step-list" id="stepList"></ul>
+    <div class="result-box" id="resultBox">
+      <div class="check-label">Check</div>
+      <div class="check-eq" id="checkEq"></div>
+      <div class="answer" id="answerLine"></div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="nextBtn" onclick="nextStep()">Next Step →</button>
+      <button class="btn secondary" onclick="showAll()">Show All</button>
+      <button class="btn secondary" onclick="reset()">Reset</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let steps = [];       // computed steps
+let revealed = 0;     // how many steps shown
+let gridCells = [];   // { row, col, el, class }
+let totalRows = 0;
+let totalCols = 0;
+
+// ── Compute long-division steps ────────────────────────────────────────────
+function computeSteps(dividend, divisor) {
+  const digits = String(dividend).split('').map(Number);
+  const result = { steps: [], quotient: 0, remainder: 0 };
+  let current = 0;
+  let quotientDigits = [];
+
+  for (let i = 0; i < digits.length; i++) {
+    current = current * 10 + digits[i];
+    const q = Math.floor(current / divisor);
+    const product = q * divisor;
+    const rem = current - product;
+    quotientDigits.push(q);
+    result.steps.push({ digitIndex: i, brought: digits[i], current, q, product, rem });
+    current = rem;
+  }
+  result.quotient = parseInt(quotientDigits.join(''), 10) || 0;
+  result.remainder = current;
+  return result;
+}
+
+// ── Build the visual grid ──────────────────────────────────────────────────
+function buildGrid(dividend, divisor, data) {
+  const table = document.getElementById('divGrid');
+  table.innerHTML = '';
+  gridCells = [];
+
+  const dStr = String(dividend);
+  const dLen = dStr.length;
+
+  // rows: 0 = quotient, 1 = divisor+dividend, then 2 per step (product, remainder)
+  const numRows = 2 + data.steps.length * 2;
+  // cols: 1 (minus) + 1 (divisor) + dLen (digits) + 1 (bracket padding)
+  const divisorLen = String(divisor).length;
+  const numCols = 1 + divisorLen + dLen;
+  totalRows = numRows;
+  totalCols = numCols;
+
+  // helper: make a cell
+  function makeCell(r, c, text='', cls='') {
+    const td = document.createElement('td');
+    if (text !== '') td.textContent = text;
+    if (cls) cls.split(' ').forEach(k => k && td.classList.add(k));
+    // store reference
+    gridCells.push({ row: r, col: c, el: td, text, cls });
+    return td;
+  }
+
+  const rows = [];
+  for (let r = 0; r < numRows; r++) {
+    const tr = document.createElement('tr');
+    rows.push(tr);
+    table.appendChild(tr);
+  }
+
+  // helper to get or create td in a row/col
+  const cellMap = {}; // "r,c" -> td
+  function cell(r, c, text='', cls='') {
+    const key = `${r},${c}`;
+    if (cellMap[key]) return cellMap[key];
+    const td = makeCell(r, c, text, cls);
+    cellMap[key] = td;
+    return td;
+  }
+
+  // populate every row with numCols tds first
+  for (let r = 0; r < numRows; r++) {
+    for (let c = 0; c < numCols; c++) {
+      const td = cell(r, c);
+      rows[r].appendChild(td);
+    }
+  }
+
+  // — Row 0: quotient digits —
+  // quotient digits align to right side of dividend area
+  const quotientStr = String(data.quotient).padStart(dLen, ' ');
+  const colOffset = 1 + divisorLen; // columns before the dividend digits
+  quotientStr.split('').forEach((ch, i) => {
+    const c = colOffset + i;
+    const td = cellMap[`0,${c}`];
+    td.dataset.revealGroup = `q${i}`;
+    td.dataset.revealText = ch.trim();
+    td.dataset.revealClass = 'quotient';
+  });
+
+  // — Row 1: divisor + dividend —
+  // divisor
+  String(divisor).split('').forEach((ch, i) => {
+    const td = cellMap[`1,${1 + i}`];
+    td.textContent = ch;
+    td.classList.add('show', 'divisor-box');
+  });
+  // last divisor cell gets the bracket styling
+  const bracketCell = cellMap[`1,${divisorLen}`];
+  // dividend digits
+  dStr.split('').forEach((ch, i) => {
+    const td = cellMap[`1,${colOffset + i}`];
+    td.textContent = ch;
+    td.classList.add('show');
+    if (i === 0) td.classList.add('divisor-box');
+  });
+
+  // — Step rows (product + remainder) —
+  data.steps.forEach((step, si) => {
+    const productRow = 2 + si * 2;
+    const remRow = productRow + 1;
+
+    // right-align the product under the current digits
+    // current occupies columns colOffset+0 ... colOffset+step.digitIndex
+    const prodStr = String(step.product);
+    const rightCol = colOffset + step.digitIndex;
+    const leftProdCol = rightCol - prodStr.length + 1;
+
+    // minus sign
+    const minusTd = cellMap[`${productRow},0`];
+    minusTd.textContent = '−';
+    minusTd.classList.add('minus-cell');
+    minusTd.dataset.revealGroup = `step${si}`;
+
+    prodStr.split('').forEach((ch, i) => {
+      const c = leftProdCol + i;
+      const td = cellMap[`${productRow},${c}`];
+      td.dataset.revealGroup = `step${si}`;
+      td.dataset.revealText = ch;
+      td.dataset.revealClass = 'product';
+    });
+    rows[productRow].classList.add('sub-line');
+
+    // remainder / brought-down
+    const remStr = String(step.rem === 0 && si === data.steps.length - 1 ? '' : step.rem);
+    if (si === data.steps.length - 1) {
+      // final remainder
+      if (step.rem > 0) {
+        String(step.rem).split('').forEach((ch, i) => {
+          const c = rightCol - String(step.rem).length + 1 + i;
+          const td = cellMap[`${remRow},${c}`];
+          td.dataset.revealGroup = `step${si}`;
+          td.dataset.revealText = ch;
+          td.dataset.revealClass = 'remainder-digit';
+        });
+      }
+    } else {
+      // partial remainder + next brought digit
+      const bringDown = step.rem * 10 + data.steps[si + 1].brought;
+      const bdStr = String(bringDown);
+      bdStr.split('').forEach((ch, i) => {
+        const c = rightCol - bdStr.length + 2 + i;
+        const td = cellMap[`${remRow},${c}`];
+        td.dataset.revealGroup = `step${si}`;
+        td.dataset.revealText = ch;
+        td.dataset.revealClass = '';
+      });
+    }
+  });
+
+  return { colOffset, dLen };
+}
+
+// ── Reveal helpers ─────────────────────────────────────────────────────────
+function revealGroup(group) {
+  gridCells.forEach(({ el }) => {
+    if (el.dataset.revealGroup === group) {
+      el.textContent = el.dataset.revealText || el.textContent;
+      if (el.dataset.revealClass) el.classList.add(el.dataset.revealClass);
+      el.classList.add('show');
+    }
+  });
+}
+
+function revealAll() {
+  gridCells.forEach(({ el }) => {
+    if (el.dataset.revealGroup) {
+      el.textContent = el.dataset.revealText || el.textContent;
+      if (el.dataset.revealClass) el.classList.add(el.dataset.revealClass);
+      el.classList.add('show');
+    }
+    if (el.classList.contains('minus-cell')) el.classList.add('show');
+  });
+}
+
+// ── Step panel ─────────────────────────────────────────────────────────────
+function buildStepItems(data, dividend, divisor) {
+  const list = document.getElementById('stepList');
+  list.innerHTML = '';
+  data.steps.forEach((step, si) => {
+    const li = document.createElement('li');
+    li.className = 'step-item';
+    li.id = `step-item-${si}`;
+    const isLast = si === data.steps.length - 1;
+    let html = `<span class="eq">${step.current} ÷ ${divisor} = <span class="q">${step.q}</span> r <span class="r">${step.rem}</span></span><br>`;
+    html += `<span class="eq"><span class="q">${step.q}</span> × ${divisor} = <span class="p">${step.product}</span></span>`;
+    if (isLast) {
+      html += `<br><small style="color:var(--muted)">End of dividend reached — remainder <span class="r" style="font-family:JetBrains Mono">${step.rem}</span></small>`;
+    }
+    li.innerHTML = html;
+    list.appendChild(li);
+  });
+}
+
+// ── Main flow ──────────────────────────────────────────────────────────────
+let divData = null;
+
+function startDivision() {
+  const dividend = parseInt(document.getElementById('dividend').value, 10);
+  const divisor = parseInt(document.getElementById('divisor').value, 10);
+  const errEl = document.getElementById('errorMsg');
+  errEl.textContent = '';
+
+  if (!dividend || !divisor || dividend < 1 || divisor < 1) {
+    errEl.textContent = 'Please enter positive numbers.'; return;
+  }
+  if (divisor > dividend) {
+    errEl.textContent = 'Divisor must be ≤ dividend for this visualizer.'; return;
+  }
+  if (dividend > 9999999) {
+    errEl.textContent = 'Dividend too large (max 7 digits).'; return;
+  }
+
+  divData = computeSteps(dividend, divisor);
+  revealed = 0;
+
+  buildGrid(dividend, divisor, divData);
+  buildStepItems(divData, dividend, divisor);
+
+  // reset result box
+  const rb = document.getElementById('resultBox');
+  rb.classList.remove('visible');
+
+  document.getElementById('mainArea').style.display = 'flex';
+  document.getElementById('nextBtn').disabled = false;
+
+  // reveal quotient immediately (first)
+  // actually start clean — show nothing yet, user presses Next
+}
+
+function nextStep() {
+  if (!divData) return;
+  if (revealed === 0) {
+    // reveal quotient
+    divData.steps.forEach((_, si) => revealGroup(`q${si}`));
+    // also just the first step group
+  }
+  if (revealed < divData.steps.length) {
+    revealGroup(`step${revealed}`);
+    const li = document.getElementById(`step-item-${revealed}`);
+    if (li) {
+      li.classList.add('visible');
+      setTimeout(() => li.classList.add('active'), 10);
+      // remove active from previous
+      if (revealed > 0) {
+        const prev = document.getElementById(`step-item-${revealed - 1}`);
+        if (prev) prev.classList.remove('active');
+      }
+    }
+    revealed++;
+  }
+  if (revealed === divData.steps.length) {
+    showResult();
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function showAll() {
+  if (!divData) return;
+  revealAll();
+  for (let si = 0; si < divData.steps.length; si++) {
+    const li = document.getElementById(`step-item-${si}`);
+    if (li) { li.classList.add('visible'); li.classList.remove('active'); }
+  }
+  revealed = divData.steps.length;
+  showResult();
+  document.getElementById('nextBtn').disabled = true;
+}
+
+function showResult() {
+  const dividend = parseInt(document.getElementById('dividend').value, 10);
+  const divisor = parseInt(document.getElementById('divisor').value, 10);
+  const rb = document.getElementById('resultBox');
+  const q = divData.quotient, r = divData.remainder;
+  document.getElementById('checkEq').innerHTML =
+    `${q} × ${divisor} + ${r} = ${q * divisor + r}`;
+  document.getElementById('answerLine').textContent =
+    `${dividend} ÷ ${divisor} = ${q}${r > 0 ? ` (r${r})` : ''}`;
+  setTimeout(() => rb.classList.add('visible'), 80);
+}
+
+function reset() {
+  document.getElementById('mainArea').style.display = 'none';
+  divData = null;
+  revealed = 0;
+}
+
+// allow Enter key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const active = document.getElementById('mainArea');
+    if (active.style.display === 'none') startDivision();
+    else if (!document.getElementById('nextBtn').disabled) nextStep();
+  }
+});
+</script>
+</body>
+</html>
