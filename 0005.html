@@ -1,196 +1,856 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="header.js"></script>
-    <title>Division Visualizer</title>
-    <style>
-        :root {
-            --primary: #2563eb;
-            --background: #f8fafc;
-            --text: #0f172a;
-            --border: #cbd5e1;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="header.js"></script>
+<title>Bahagi</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 0 auto;
-      overflow-y: scroll;
-    }
+  :root {
+    --bg: #1a1f2e;
+    --surface: #232838;
+    --border: #2e3548;
+    --quotient: #f0c040;
+    --product: #e05a5a;
+    --rem-col: #5ac8e0;
+    --text: #d4daf0;
+    --muted: #7080a0;
+    --accent: #4c5fcf;
+    --green: #5adb8a;
+    --cell: 52px;
+  }
 
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin: 1rem auto;
-            background: white;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            max-width: 90%;
-        }
+  body {
+    background: var(--bg);
+    height: 100dvh;
+  }
 
-        input {
-            width: 70px;
-            padding: 0.5rem;
-            font-size: 1rem;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            text-align: center;
-        }
+  container {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 22px 16px 64px;
+  }
 
-        button {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.5rem;
-            font-size: 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+  h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
 
-        button:hover {
-            opacity: 0.9;
-        }
+  /* ── mode toggle ── */
+  .mode-toggle {
+    display: flex;
+    gap: 0;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    overflow: hidden;
+  }
+  .mode-toggle button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 9px 20px;
+    cursor: pointer;
+    transition: background .2s, color .2s;
+  }
+  .mode-toggle button.active {
+    background: var(--accent);
+    color: #fff;
+  }
 
-        /* Long Division Layout Grid */
-        .division-container {
-            display: inline-grid;
-            grid-template-columns: auto auto;
-            gap: 0;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 1rem;
-            font-weight: bold;
-            padding: 2rem;
-            max-width: 90%;
-        }
+  /* ── input panel ── */
+  .input-panel {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .input-panel label { font-size: 0.82rem; color: var(--muted); margin-right: 2px; }
+  .num-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 600;
+    width: 106px;
+    padding: 9px 12px;
+    text-align: center;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .num-input:focus { border-color: var(--accent); }
+  .divide-sym { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; color: var(--muted); }
 
-        .divisor {
-            padding: 0.2rem 0.5rem;
-            text-align: right;
-            grid-column: 1;
-            grid-row: 2;
-            align-self: end;
-        }
+  .btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 10px;
+    cursor: pointer;
+    transition: opacity .2s, transform .1s;
+  }
+  .btn:hover { opacity: .88; }
+  .btn:active { transform: scale(.97); }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .btn.ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .btn.ghost:hover { border-color: var(--text); color: var(--text); }
 
-        .quotient {
-            padding: 0.2rem 0.5rem;
-            grid-column: 2;
-            grid-row: 1;
-            text-align: left;
-            letter-spacing: 0.5rem;
-        }
+  /* ── main layout ── */
+  .main {
+    display: flex;
+    gap: 44px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    max-width: 900px;
+  }
 
-        .work-area {
-            grid-column: 2;
-            grid-row: 2;
-            border-top: 4px solid var(--text);
-            border-left: 4px solid var(--text);
-            border-top-left-radius: 12px 100%;
-            padding: 0.2rem 0.5rem;
-            text-align: left;
-            line-height: 1.4;
-            letter-spacing: 0.5rem;
-            white-space: pre;
-        }
-    </style>
+  /* ── grid table ── */
+  .division-wrap { position: relative; }
+  .grid-table { border-collapse: collapse; }
+
+  .grid-table td {
+    width: var(--cell);
+    height: var(--cell);
+    text-align: center;
+    vertical-align: middle;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text);
+    position: relative;
+  }
+
+  /* static cells */
+  .cell-static {}
+  .cell-given  { color: var(--text); }
+  .cell-divisor-right { border-right: 3px solid var(--text); }
+  .cell-dividend-top  { border-top: 3px solid var(--text); }
+  .sub-line td        { border-bottom: 2px solid var(--muted); }
+  .minus-td { color: var(--muted); font-size: 1.4rem; }
+
+  /* colour roles (reveal / correct) */
+  .role-q   { color: var(--quotient); }
+  .role-p   { color: var(--product); }
+  .role-r   { color: var(--rem-col); }
+
+  /* ── input cells ── */
+  .cell-input {
+    padding: 0;
+  }
+  .cell-input input {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 2px dashed var(--border);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+    transition: border-color .2s, background .25s, color .2s;
+    caret-color: var(--accent);
+  }
+  .cell-input input:focus {
+    border-bottom-color: var(--accent);
+    background: rgba(76,95,207,.08);
+  }
+  /* role colours on inputs */
+  .cell-input.role-q input { color: var(--quotient); border-bottom-color: rgba(240,192,64,.3); }
+  .cell-input.role-p input { color: var(--product);  border-bottom-color: rgba(224,90,90,.3); }
+  .cell-input.role-r input { color: var(--rem-col);  border-bottom-color: rgba(90,200,224,.3); }
+
+  /* feedback states */
+  .cell-input.correct input  { color: var(--green);   border-bottom: 2px solid var(--green); background: rgba(90,219,138,.06); }
+  .cell-input.wrong   input  { color: var(--product); border-bottom: 2px solid var(--product); background: rgba(224,90,90,.08); animation: shake .3s; }
+  .cell-input.locked  input  { pointer-events: none; border-bottom-style: solid; opacity: .85; }
+
+  @keyframes shake {
+    0%,100%{ transform:translateX(0) }
+    25%    { transform:translateX(-4px) }
+    75%    { transform:translateX(4px) }
+  }
+
+  /* ── numpad ── */
+  .numpad {
+    display: none;
+    gap: 6px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .numpad.visible { display: flex; }
+  .numpad-key {
+    width: 40px;
+    height: 40px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s, border-color .15s, transform .1s;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .numpad-key:active { transform: scale(.92); background: var(--accent); border-color: var(--accent); }
+  .numpad-key.bksp { font-size: 1rem; color: var(--muted); width: 64px; }
+  .numpad-key.highlighted { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(76,95,207,.35); }
+
+  /* focused cell highlight */
+  .cell-input.focused input { border-bottom-color: var(--accent); background: rgba(76,95,207,.13); }
+
+  /* ── side panel ── */
+  .side-panel { min-width: 250px; max-width: 320px; flex: 1; }
+
+  .panel-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  /* step cards */
+  .step-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .step-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 15px;
+    font-size: .86rem;
+    line-height: 1.55;
+    opacity: .38;
+    transition: opacity .3s, border-color .3s;
+  }
+  .step-card.unlocked { opacity: 1; }
+  .step-card.active   { border-color: var(--accent); }
+  .step-card.done     { border-color: var(--green); opacity: 1; }
+  .step-card .mono    { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+  .step-card .sq { color: var(--quotient); }
+  .step-card .sp { color: var(--product); }
+  .step-card .sr { color: var(--rem-col); }
+
+  /* hint / feedback line */
+  .feedback-line {
+    margin-top: 10px;
+    font-size: .82rem;
+    min-height: 20px;
+    color: var(--muted);
+    font-style: italic;
+  }
+  .feedback-line.ok  { color: var(--green); font-style: normal; font-weight: 600; }
+  .feedback-line.err { color: var(--product); font-style: normal; }
+
+  /* result box */
+  .result-box {
+    margin-top: 22px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .5s, transform .5s;
+  }
+  .result-box.show { opacity: 1; transform: translateY(0); }
+  .result-box .rl { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; }
+  .result-box .req { font-family: 'JetBrains Mono', monospace; font-size: .95rem; font-weight: 600; margin-bottom: 8px; }
+  .result-box .rans { font-family: 'JetBrains Mono', monospace; font-size: 1.25rem; font-weight: 700; color: var(--green); }
+
+  /* controls */
+  .controls { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+
+  /* error */
+  .error-msg { color: var(--product); font-size: .84rem; margin-top: 6px; min-height: 18px; text-align: center; }
+
+  @media(max-width:600px){
+    :root{ --cell:40px; }
+    .grid-table td { font-size:1rem; }
+    .cell-input input { font-size:1rem; }
+  }
+</style>
 </head>
 <body>
 <header3-component></header3-component>
-    <h1>Division Visualizer</h1>
+<container>
+<h1>Bahagi</h1>
+<div class="mode-toggle">
+  <button id="modeLearn" class="active" onclick="setMode('learn')">📖Belajar</button>
+  <button id="modePractice"             onclick="setMode('practice')">✏️Latihan</button>
+</div>
 
-    <div class="controls">
-        <input type="number" id="dividend" value="475" min="1" placeholder="Dividend">
-        <span>÷</span>
-        <input type="number" id="divisor" value="12" min="1" placeholder="Divisor">
-        <button onclick="calculateLongDivision()">Divide</button>
+<div class="input-panel">
+  <input class="num-input" id="dividend" type="number" min="1" max="9999999" value="3476">
+  <span class="divide-sym">÷</span>
+  <input class="num-input" id="divisor"  type="number" min="1" max="999"     value="7">
+  <button class="btn" onclick="startDivision()">Kira</button>
+  <button class="btn ghost" onclick="randomize()">🎲 Rawak</button>
+</div>
+<div class="error-msg" id="errorMsg"></div>
+
+<div class="main" id="mainArea" style="display:none">
+  <div class="division-wrap">
+    <table class="grid-table" id="divGrid"></table>
+  </div>
+
+  <div class="side-panel">
+    <div class="panel-title" id="panelTitle">Steps</div>
+    <div class="numpad" id="numpad">
+      <button class="numpad-key" onclick="numpadPress('1')">1</button>
+      <button class="numpad-key" onclick="numpadPress('2')">2</button>
+      <button class="numpad-key" onclick="numpadPress('3')">3</button>
+      <button class="numpad-key" onclick="numpadPress('4')">4</button>
+      <button class="numpad-key" onclick="numpadPress('5')">5</button>
+      <button class="numpad-key" onclick="numpadPress('6')">6</button>
+      <button class="numpad-key" onclick="numpadPress('7')">7</button>
+      <button class="numpad-key" onclick="numpadPress('8')">8</button>
+      <button class="numpad-key" onclick="numpadPress('9')">9</button>
+      <button class="numpad-key" onclick="numpadPress('0')">0</button>
+      <button class="numpad-key bksp" onclick="numpadPress('backspace')">⌫</button>
     </div>
-
-    <div class="division-container" id="outputContainer" style="display: none;">
-        <div class="quotient" id="displayQuotient"></div>
-        <div class="divisor" id="displayDivisor"></div>
-        <div class="work-area" id="displayWork"></div>
+    <ul class="step-list" id="stepList"></ul>
+    <div class="feedback-line" id="feedbackLine"></div>
+    <div class="result-box" id="resultBox">
+      <div class="rl">Check</div>
+      <div class="req" id="checkEq"></div>
+      <div class="rans" id="answerLine"></div>
     </div>
+    <div class="controls" id="controlBar"></div>
+  </div>
+</div>
+</container>
+<script>
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+let mode      = 'learn';   // 'learn' | 'practice'
+let divData   = null;
+let revealed  = 0;         // learn mode: steps revealed
+let practiceStep = 0;      // practice mode: which step is active (0-based)
+let stepDone  = [];        // practice mode: bool per step
 
-    <script>
-        function calculateLongDivision() {
-            const dividendInput = document.getElementById('dividend').value;
-            const divisorInput = document.getElementById('divisor').value;
-            
-            const dividendStr = dividendInput.toString().trim();
-            const divisor = parseInt(divisorInput, 10);
-            
-            if (!dividendStr || isNaN(divisor) || divisor <= 0) {
-                alert("Please enter valid positive numbers.");
-                return;
-            }
+// ═══════════════════════════════════════════════
+//  MODE TOGGLE
+// ═══════════════════════════════════════════════
+function setMode(m) {
+  mode = m;
+  document.getElementById('modeLearn').classList.toggle('active', m === 'learn');
+  document.getElementById('modePractice').classList.toggle('active', m === 'practice');
+  if (divData) startDivision(); // rebuild
+}
 
-            let quotientStr = "";
-            let currentNumberStr = "";
-            let stepsHTML = "";
-            
-            // Loop through each digit of the dividend
-            for (let i = 0; i < dividendStr.length; i++) {
-                const currentDigit = dividendStr[i];
-                currentNumberStr += currentDigit;
-                let currentVal = parseInt(currentNumberStr, 10);
-                
-                // Pad left tracking space to visually align columns
-                const spaces = " ".repeat(i);
+// ═══════════════════════════════════════════════
+//  COMPUTE STEPS
+// ═══════════════════════════════════════════════
+function computeSteps(dividend, divisor) {
+  const digits = String(dividend).split('').map(Number);
+  let current = 0, quotientDigits = [], steps = [];
+  for (let i = 0; i < digits.length; i++) {
+    current = current * 10 + digits[i];
+    const q = Math.floor(current / divisor);
+    const product = q * divisor;
+    const rem = current - product;
+    quotientDigits.push(q);
+    steps.push({ digitIndex: i, brought: digits[i], current, q, product, rem });
+    current = rem;
+  }
+  return {
+    steps,
+    quotient:  parseInt(quotientDigits.join(''), 10) || 0,
+    remainder: steps[steps.length - 1].rem
+  };
+}
 
-                if (i === 0) {
-                    // Start by writing down the base dividend row
-                    stepsHTML += `${currentDigit}`;
-                } else {
-                    stepsHTML += `${currentDigit}`;
-                }
+// ═══════════════════════════════════════════════
+//  BUILD GRID  (shared skeleton)
+// ═══════════════════════════════════════════════
+function buildGrid(dividend, divisor, data) {
+  const table = document.getElementById('divGrid');
+  table.innerHTML = '';
 
-                if (currentVal >= divisor) {
-                    const localQuotient = Math.floor(currentVal / divisor);
-                    const product = localQuotient * divisor;
-                    const remainder = currentVal % divisor;
-                    
-                    quotientStr += localQuotient;
-                    
-                    // Match visual padding based on length differences
-                    const productPadding = " ".repeat(i - (product.toString().length - 1));
-                    const remainderPadding = " ".repeat(i - (remainder.toString().length - 1));
-                    
-                    stepsHTML += `\n${productPadding}-${product}\n${productPadding}${"-".repeat(product.toString().length)}`;
-                    
-                    currentNumberStr = remainder.toString();
-                    
-                    // Avoid appending intermediate zeroes if there is a remainder coming up next
-                    if (i < dividendStr.length - 1) {
-                        stepsHTML += `\n${remainderPadding}${remainder}`;
-                        if(currentNumberStr === "0") {
-                            currentNumberStr = "";
-                        }
-                    } else {
-                        stepsHTML += `\n${remainderPadding}${remainder}  (R)`;
-                    }
-                } else {
-                    // The step value cannot be divided yet
-                    quotientStr += "0";
-                    if (i === dividendStr.length - 1) {
-                        const finalRemPadding = " ".repeat(dividendStr.length - currentVal.toString().length);
-                        stepsHTML += `\n\n${finalRemPadding}${currentVal}  (R)`;
-                    }
-                }
-            }
+  const dStr = String(dividend);
+  const dLen = dStr.length;
+  const divisorLen = String(divisor).length;
+  const colOffset = 1 + divisorLen;
+  const numCols = colOffset + dLen;
+  const numRows = 2 + data.steps.length * 2;
 
-            // Clean up leading zeros in quotient string display
-            let finalQuotient = quotientStr.replace(/^0+/, '');
-            if (finalQuotient === "") finalQuotient = "0";
+  // pre-build rows + cellMap
+  const rows = [], cellMap = {};
+  for (let r = 0; r < numRows; r++) {
+    const tr = document.createElement('tr');
+    rows.push(tr);
+    table.appendChild(tr);
+    for (let c = 0; c < numCols; c++) {
+      const td = document.createElement('td');
+      rows[r].appendChild(td);
+      cellMap[`${r},${c}`] = td;
+    }
+  }
 
-            // Render output fields to browser
-            document.getElementById('displayQuotient').innerText = finalQuotient;
-            document.getElementById('displayDivisor').innerText = divisor;
-            document.getElementById('displayWork').innerText = stepsHTML;
-            document.getElementById('outputContainer').style.display = 'inline-grid';
-        }
-    </script>
+  // helper: mark a td as static text
+  function staticCell(r, c, text, ...classes) {
+    const td = cellMap[`${r},${c}`];
+    td.textContent = text;
+    td.classList.add('cell-static', 'cell-given', ...classes);
+    return td;
+  }
+
+  // — divisor (always shown) —
+  String(divisor).split('').forEach((ch, i) => {
+    const td = staticCell(1, 1 + i, ch);
+    if (i === divisorLen - 1) td.classList.add('cell-divisor-right');
+  });
+
+  // — dividend (always shown) —
+  dStr.split('').forEach((ch, i) => {
+    staticCell(1, colOffset + i, ch, 'cell-dividend-top');
+  });
+
+  // — minus signs (always shown, dimmed) —
+  data.steps.forEach((_, si) => {
+    const r = 2 + si * 2;
+    const td = cellMap[`${r},0`];
+    td.textContent = '−';
+    td.classList.add('minus-td');
+    rows[r].classList.add('sub-line');
+  });
+
+  // — place fillable / reveal cells per step —
+  const quotientStr = String(data.quotient).padStart(dLen, ' ');
+
+  data.steps.forEach((step, si) => {
+    const productRow = 2 + si * 2;
+    const remRow     = productRow + 1;
+    const rightCol   = colOffset + step.digitIndex;
+    const prodStr    = String(step.product);
+    const leftProd   = rightCol - prodStr.length + 1;
+
+    // quotient digit for this step — use step.q directly (handles leading zeros)
+    placeCell(0, colOffset + step.digitIndex, String(step.q), 'q', si, data, rows, cellMap, quotientStr, dLen);
+
+    // product digits
+    prodStr.split('').forEach((ch, i) => {
+      placeCell(productRow, leftProd + i, ch, 'p', si, data, rows, cellMap, quotientStr, dLen);
+    });
+
+    // remainder / bring-down
+    if (si === data.steps.length - 1) {
+      if (step.rem > 0) {
+        String(step.rem).split('').forEach((ch, i) => {
+          const c = rightCol - String(step.rem).length + 1 + i;
+          placeCell(remRow, c, ch, 'r', si, data, rows, cellMap, quotientStr, dLen);
+        });
+      }
+    } else {
+      const bd = step.rem * 10 + data.steps[si + 1].brought;
+      String(bd).split('').forEach((ch, i) => {
+        const c = rightCol - String(bd).length + 2 + i;
+        placeCell(remRow, c, ch, '', si, data, rows, cellMap, quotientStr, dLen);
+      });
+    }
+  });
+}
+
+// place either a static (learn) or input (practice) cell
+function placeCell(r, c, value, role, stepIdx, data, rows, cellMap, quotientStr, dLen) {
+  const td = cellMap[`${r},${c}`];
+  if (!td) return;
+  td.innerHTML = '';
+  td.className = '';
+  if (role) td.classList.add(`role-${role}`);
+
+  if (mode === 'learn') {
+    td.classList.add('cell-static');
+    td.style.color = 'transparent';
+    td.textContent = value;
+    td.dataset.step = stepIdx;
+    td.dataset.value = value;
+  } else {
+    // practice: make an <input>
+    td.classList.add('cell-input');
+    if (role) td.classList.add(`role-${role}`);
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.maxLength = 1;
+    inp.dataset.answer = value;
+    inp.dataset.step   = stepIdx;
+    inp.dataset.role   = role;
+    inp.setAttribute('autocomplete', 'off');
+
+    // lock future steps
+    if (stepIdx > 0) {
+      inp.disabled = true;
+      td.classList.add('locked');
+    }
+
+    // prevent mobile keyboard — use numpad instead
+    inp.setAttribute('readonly', 'readonly');
+    inp.setAttribute('inputmode', 'none');
+
+    inp.addEventListener('keydown', e => {
+      if (!/^[0-9]$/.test(e.key) && !['Backspace','Delete','ArrowLeft','ArrowRight','Tab'].includes(e.key)) {
+        e.preventDefault();
+      }
+      if (/^[0-9]$/.test(e.key)) { e.preventDefault(); handleDigitInput(inp, e.key); }
+      if (e.key === 'Backspace' || e.key === 'Delete') { e.preventDefault(); handleDigitInput(inp, 'backspace'); }
+    });
+
+    inp.addEventListener('focus', () => {
+      setFocusedInput(inp);
+    });
+    inp.addEventListener('click', () => {
+      setFocusedInput(inp);
+    });
+
+    // value changes are driven by numpadPress/handleDigitInput, not native input events
+
+    td.appendChild(inp);
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  NUMPAD & FOCUS TRACKING
+// ═══════════════════════════════════════════════
+let focusedInput = null;
+
+function setFocusedInput(inp) {
+  if (inp.readOnly && !inp.dataset.answer) return; // fully locked
+  // clear previous highlight
+  document.querySelectorAll('.cell-input.focused').forEach(td => td.classList.remove('focused'));
+  focusedInput = inp;
+  if (inp) inp.closest('td').classList.add('focused');
+}
+
+function numpadPress(digit) {
+  if (!focusedInput) {
+    // try to find first unlocked input in current step
+    if (divData) {
+      const first = getStepInputs(practiceStep).find(i => !i.readOnly);
+      if (first) { setFocusedInput(first); }
+    }
+    if (!focusedInput) return;
+  }
+  handleDigitInput(focusedInput, digit);
+}
+
+function handleDigitInput(inp, digit) {
+  if (inp.disabled) return;
+  // check if this cell is already correctly locked
+  const td = inp.closest('td');
+  if (td.classList.contains('correct')) return;
+
+  if (digit === 'backspace') {
+    inp.value = '';
+    td.classList.remove('correct', 'wrong');
+    return;
+  }
+
+  inp.value = digit;
+  td.classList.remove('correct', 'wrong');
+
+  if (digit === inp.dataset.answer) {
+    td.classList.add('correct');
+    inp.readOnly = true;
+    td.classList.remove('focused');
+    focusedInput = null;
+    // move focus to next unlocked cell in this step
+    const siblings = getStepInputs(parseInt(inp.dataset.step));
+    const nextEmpty = siblings.find(i => !i.readOnly);
+    if (nextEmpty) {
+      nextEmpty.focus();
+      setFocusedInput(nextEmpty);
+    } else {
+      autoAdvanceStep(parseInt(inp.dataset.step));
+    }
+  } else {
+    td.classList.add('wrong');
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  LEARN MODE helpers
+// ═══════════════════════════════════════════════
+function learnRevealStep(si) {
+  document.querySelectorAll(`[data-step="${si}"]`).forEach(el => {
+    el.style.color = '';   // remove transparent override — CSS role class takes over
+  });
+}
+
+function learnRevealAll() {
+  for (let si = 0; si < divData.steps.length; si++) learnRevealStep(si);
+}
+
+function buildLearnControls() {
+  const bar = document.getElementById('controlBar');
+  bar.innerHTML = '';
+  const nxt = mkBtn('Next Step →', 'nextStepLearn()', false);
+  nxt.id = 'nextBtn';
+  bar.appendChild(nxt);
+  bar.appendChild(mkBtn('Show All', 'showAllLearn()', false, 'ghost'));
+  bar.appendChild(mkBtn('Reset', 'reset()', false, 'ghost'));
+}
+
+function nextStepLearn() {
+  if (!divData) return;
+  if (revealed === 0) learnRevealAll(); // reveal quotient row always first
+  if (revealed < divData.steps.length) {
+    learnRevealStep(revealed);
+    setStepCard(revealed, 'done');
+    if (revealed > 0) setStepCard(revealed - 1, 'done');
+    revealed++;
+  }
+  if (revealed === divData.steps.length) {
+    showResult();
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function showAllLearn() {
+  learnRevealAll();
+  for (let si = 0; si < divData.steps.length; si++) setStepCard(si, 'done');
+  revealed = divData.steps.length;
+  showResult();
+  if (document.getElementById('nextBtn')) document.getElementById('nextBtn').disabled = true;
+}
+
+// ═══════════════════════════════════════════════
+//  PRACTICE MODE helpers
+// ═══════════════════════════════════════════════
+function buildPracticeControls() {
+  const bar = document.getElementById('controlBar');
+  bar.innerHTML = '';
+  bar.appendChild(mkBtn('Hint', 'giveHint()', false, 'ghost'));
+  bar.appendChild(mkBtn('Give Up', 'giveUp()', false, 'ghost'));
+  bar.appendChild(mkBtn('Reset', 'reset()', false, 'ghost'));
+}
+
+function getStepInputs(si) {
+  return [...document.querySelectorAll(`.cell-input input[data-step="${si}"]`)];
+}
+
+function unlockStep(si) {
+  getStepInputs(si).forEach(inp => {
+    inp.disabled = false;
+    inp.readOnly = false;
+    inp.closest('td').classList.remove('locked');
+  });
+  const first = getStepInputs(si).find(i => !i.readOnly);
+  if (first) setTimeout(() => { first.focus(); setFocusedInput(first); }, 80);
+  setStepCard(si, 'active');
+}
+
+function autoAdvanceStep(si) {
+  if (si !== practiceStep) return;
+  const inputs = getStepInputs(si);
+  // lock all cells visually
+  inputs.forEach(inp => { inp.readOnly = true; inp.closest('td').classList.add('locked'); });
+
+  const fb = document.getElementById('feedbackLine');
+  fb.className = 'feedback-line ok';
+  fb.textContent = si === divData.steps.length - 1 ? '🎉 All done!' : '✓ Step correct! Next step unlocked.';
+
+  setStepCard(si, 'done');
+  stepDone[si] = true;
+  practiceStep++;
+
+  if (practiceStep < divData.steps.length) {
+    unlockStep(practiceStep);
+  } else {
+    showResult();
+  }
+}
+
+// kept for compatibility (hint/give-up still call it indirectly)
+function checkCurrentStep() { /* no-op — checking is now instant per cell */ }
+
+function giveHint() {
+  const si = practiceStep;
+  if (si >= divData.steps.length) return;
+  const inputs = getStepInputs(si);
+  const empty = inputs.filter(i => !i.readOnly);
+  if (!empty.length) return;
+  const pick = empty[Math.floor(Math.random() * empty.length)];
+  // directly fill correct answer
+  handleDigitInput(pick, pick.dataset.answer);
+
+  const fb = document.getElementById('feedbackLine');
+  fb.className = 'feedback-line';
+  fb.textContent = 'Hint: one box filled in for you.';
+}
+
+function giveUp() {
+  for (let si = practiceStep; si < divData.steps.length; si++) {
+    getStepInputs(si).forEach(inp => {
+      inp.disabled = false;
+      inp.readOnly = true;
+      inp.value = inp.dataset.answer;
+      const td = inp.closest('td');
+      td.classList.remove('wrong');
+      td.classList.add('correct', 'locked');
+    });
+    setStepCard(si, 'done');
+  }
+  practiceStep = divData.steps.length;
+  const fb = document.getElementById('feedbackLine');
+  fb.className = 'feedback-line err';
+  fb.textContent = 'Answers revealed. Cuba lagi!';
+  showResult();
+}
+
+// ═══════════════════════════════════════════════
+//  SHARED: step cards, result, misc
+// ═══════════════════════════════════════════════
+function buildStepCards(data, divisor) {
+  const list = document.getElementById('stepList');
+  list.innerHTML = '';
+  data.steps.forEach((step, si) => {
+    const li = document.createElement('li');
+    li.className = 'step-card';
+    li.id = `sc-${si}`;
+    const isLast = si === data.steps.length - 1;
+    li.innerHTML =
+      `<span class="mono">${step.current} ÷ ${divisor} = <span class="sq">${step.q}</span> r <span class="sr">${step.rem}</span></span><br>` +
+      `<span class="mono"><span class="sq">${step.q}</span> × ${divisor} = <span class="sp">${step.product}</span></span>` +
+      (isLast ? `<br><small style="color:var(--muted)">Remainder: <span class="sr">${step.rem}</span></small>` : '');
+    list.appendChild(li);
+  });
+}
+
+function setStepCard(si, state) {
+  const el = document.getElementById(`sc-${si}`);
+  if (!el) return;
+  el.classList.remove('active', 'done', 'unlocked');
+  el.classList.add(state);
+  if (state === 'active' || state === 'done') el.classList.add('unlocked');
+}
+
+function showResult() {
+  const dividend = parseInt(document.getElementById('dividend').value, 10);
+  const divisor  = parseInt(document.getElementById('divisor').value, 10);
+  const q = divData.quotient, r = divData.remainder;
+  document.getElementById('checkEq').innerHTML    = `${q} × ${divisor} + ${r} = ${q * divisor + r}`;
+  document.getElementById('answerLine').textContent = `${dividend} ÷ ${divisor} = ${q}${r > 0 ? ` (r${r})` : ''}`;
+  setTimeout(() => document.getElementById('resultBox').classList.add('show'), 80);
+}
+
+function mkBtn(label, onclick, disabled, extra='') {
+  const b = document.createElement('button');
+  b.className = 'btn' + (extra ? ' ' + extra : '');
+  b.textContent = label;
+  b.setAttribute('onclick', onclick);
+  if (disabled) b.disabled = true;
+  return b;
+}
+
+// ═══════════════════════════════════════════════
+//  MAIN ENTRY
+// ═══════════════════════════════════════════════
+function startDivision() {
+  const dividend = parseInt(document.getElementById('dividend').value, 10);
+  const divisor  = parseInt(document.getElementById('divisor').value, 10);
+  const errEl = document.getElementById('errorMsg');
+  errEl.textContent = '';
+
+  if (!dividend || !divisor || dividend < 1 || divisor < 1) {
+    errEl.textContent = 'Please enter positive numbers.'; return;
+  }
+  if (divisor > dividend) {
+    errEl.textContent = 'Divisor must be ≤ dividend for this visualizer.'; return;
+  }
+  if (dividend > 9999999) {
+    errEl.textContent = 'Dividend too large (max 7 digits).'; return;
+  }
+
+  divData = computeSteps(dividend, divisor);
+  revealed = 0;
+  practiceStep = 0;
+  stepDone = new Array(divData.steps.length).fill(false);
+
+  document.getElementById('resultBox').classList.remove('show');
+  document.getElementById('feedbackLine').className = 'feedback-line';
+  document.getElementById('feedbackLine').textContent = '';
+
+  buildGrid(dividend, divisor, divData);
+  buildStepCards(divData, divisor);
+
+  if (mode === 'learn') {
+    document.getElementById('panelTitle').textContent = 'Steps';
+    document.getElementById('numpad').classList.remove('visible');
+    buildLearnControls();
+  } else {
+    document.getElementById('panelTitle').textContent = 'Klik nombor untuk isi jawapan.';
+    document.getElementById('numpad').classList.add('visible');
+    buildPracticeControls();
+    unlockStep(0);
+    setStepCard(0, 'active');
+  }
+
+  document.getElementById('mainArea').style.display = 'flex';
+}
+
+function randomize() {
+  const divisor  = Math.floor(Math.random() * 11) + 2;
+  const dividend = Math.floor(Math.random() * 9000) + 1000;
+  document.getElementById('dividend').value = dividend;
+  document.getElementById('divisor').value  = divisor;
+  startDivision();
+}
+
+function reset() {
+  document.getElementById('mainArea').style.display = 'none';
+  document.getElementById('numpad').classList.remove('visible');
+  focusedInput = null;
+  divData = null; revealed = 0; practiceStep = 0;
+}
+
+// Enter key shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const area = document.getElementById('mainArea');
+  // if focus is inside a grid input, let checkCurrentStep handle it
+  if (document.activeElement && document.activeElement.dataset && document.activeElement.dataset.answer) return;
+  if (area.style.display === 'none') startDivision();
+});
+</script>
 </body>
 </html>
