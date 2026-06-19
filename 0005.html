@@ -66,7 +66,8 @@
     font-family: 'Inter', sans-serif;
     font-size: 0.85rem;
     font-weight: 600;
-    padding: 9px 20px;
+    padding: 9px 15px;
+    width: 9rem;
     cursor: pointer;
     transition: background .2s, color .2s;
   }
@@ -314,16 +315,21 @@
 <container>
 <h1>Bahagi</h1>
 <div class="mode-toggle">
-  <button id="modeLearn" class="active" onclick="setMode('learn')">📖Belajar</button>
-  <button id="modePractice"             onclick="setMode('practice')">✏️Latihan</button>
+  <button id="modeLearn" class="active" onclick="setMode('learn')">📖 Learn steps</button>
+  <button id="modePractice"             onclick="setMode('practice')">✏️ Practice</button>
 </div>
 
-<div class="input-panel">
+<div id="inputLearn" class="input-panel">
   <input class="num-input" id="dividend" type="number" min="1" max="9999999" value="3476">
   <span class="divide-sym">÷</span>
   <input class="num-input" id="divisor"  type="number" min="1" max="999"     value="7">
-  <button class="btn" onclick="startDivision()">Kira</button>
-  <button class="btn ghost" onclick="randomize()">🎲 Rawak</button>
+  <button class="btn ghost" onclick="randomize()">🎲 Randomize</button>
+</div>
+<div id="inputPractice" class="input-panel" style="display:none">
+  <input class="num-input" id="dividendP" type="number" min="1" max="9999999">
+  <span class="divide-sym">÷</span>
+  <input class="num-input" id="divisorP"  type="number" min="1" max="999">
+  <button class="btn ghost" onclick="randomize()">🎲 Randomize</button>
 </div>
 <div class="error-msg" id="errorMsg"></div>
 
@@ -357,7 +363,7 @@
     <div class="controls" id="controlBar"></div>
   </div>
 </div>
-</container>
+
 <script>
 // ═══════════════════════════════════════════════
 //  STATE
@@ -375,7 +381,14 @@ function setMode(m) {
   mode = m;
   document.getElementById('modeLearn').classList.toggle('active', m === 'learn');
   document.getElementById('modePractice').classList.toggle('active', m === 'practice');
-  if (divData) startDivision(); // rebuild
+  document.getElementById('inputLearn').style.display    = m === 'learn'    ? 'flex' : 'none';
+  document.getElementById('inputPractice').style.display = m === 'practice' ? 'flex' : 'none';
+  document.getElementById('errorMsg').textContent = '';
+  if (m === 'practice') {
+    randomize(); // always start with a fresh random problem
+  } else if (divData) {
+    startDivision(); // rebuild learn view with same numbers
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -446,13 +459,19 @@ function buildGrid(dividend, divisor, data) {
     staticCell(1, colOffset + i, ch, 'cell-dividend-top');
   });
 
-  // — minus signs (always shown, dimmed) —
+  // — minus signs (hidden until step revealed in learn mode) —
   data.steps.forEach((_, si) => {
     const r = 2 + si * 2;
     const td = cellMap[`${r},0`];
     td.textContent = '−';
     td.classList.add('minus-td');
     rows[r].classList.add('sub-line');
+    if (mode === 'learn') {
+      td.style.color = 'transparent';
+      td.dataset.step = si;
+      rows[r].dataset.stepLine = si;
+      rows[r].classList.add('hidden-line');
+    }
   });
 
   // — place fillable / reveal cells per step —
@@ -612,7 +631,10 @@ function handleDigitInput(inp, digit) {
 // ═══════════════════════════════════════════════
 function learnRevealStep(si) {
   document.querySelectorAll(`[data-step="${si}"]`).forEach(el => {
-    el.style.color = '';   // remove transparent override — CSS role class takes over
+    el.style.color = '';
+  });
+  document.querySelectorAll(`[data-step-line="${si}"]`).forEach(tr => {
+    tr.classList.remove('hidden-line');
   });
 }
 
@@ -632,11 +654,9 @@ function buildLearnControls() {
 
 function nextStepLearn() {
   if (!divData) return;
-  if (revealed === 0) learnRevealAll(); // reveal quotient row always first
   if (revealed < divData.steps.length) {
     learnRevealStep(revealed);
     setStepCard(revealed, 'done');
-    if (revealed > 0) setStepCard(revealed - 1, 'done');
     revealed++;
   }
   if (revealed === divData.steps.length) {
@@ -733,7 +753,7 @@ function giveUp() {
   practiceStep = divData.steps.length;
   const fb = document.getElementById('feedbackLine');
   fb.className = 'feedback-line err';
-  fb.textContent = 'Answers revealed. Cuba lagi!';
+  fb.textContent = 'Answers revealed. Try again with Randomize!';
   showResult();
 }
 
@@ -765,8 +785,7 @@ function setStepCard(si, state) {
 }
 
 function showResult() {
-  const dividend = parseInt(document.getElementById('dividend').value, 10);
-  const divisor  = parseInt(document.getElementById('divisor').value, 10);
+  const { dividend, divisor } = getInputs();
   const q = divData.quotient, r = divData.remainder;
   document.getElementById('checkEq').innerHTML    = `${q} × ${divisor} + ${r} = ${q * divisor + r}`;
   document.getElementById('answerLine').textContent = `${dividend} ÷ ${divisor} = ${q}${r > 0 ? ` (r${r})` : ''}`;
@@ -786,8 +805,7 @@ function mkBtn(label, onclick, disabled, extra='') {
 //  MAIN ENTRY
 // ═══════════════════════════════════════════════
 function startDivision() {
-  const dividend = parseInt(document.getElementById('dividend').value, 10);
-  const divisor  = parseInt(document.getElementById('divisor').value, 10);
+  const { dividend, divisor } = getInputs();
   const errEl = document.getElementById('errorMsg');
   errEl.textContent = '';
 
@@ -818,7 +836,7 @@ function startDivision() {
     document.getElementById('numpad').classList.remove('visible');
     buildLearnControls();
   } else {
-    document.getElementById('panelTitle').textContent = 'Klik nombor untuk isi jawapan.';
+    document.getElementById('panelTitle').textContent = 'Fill in each step';
     document.getElementById('numpad').classList.add('visible');
     buildPracticeControls();
     unlockStep(0);
@@ -828,11 +846,29 @@ function startDivision() {
   document.getElementById('mainArea').style.display = 'flex';
 }
 
+function getInputs() {
+  if (mode === 'practice') {
+    return {
+      dividend: parseInt(document.getElementById('dividendP').value, 10),
+      divisor:  parseInt(document.getElementById('divisorP').value,  10)
+    };
+  }
+  return {
+    dividend: parseInt(document.getElementById('dividend').value, 10),
+    divisor:  parseInt(document.getElementById('divisor').value,  10)
+  };
+}
+
 function randomize() {
   const divisor  = Math.floor(Math.random() * 11) + 2;
   const dividend = Math.floor(Math.random() * 9000) + 1000;
-  document.getElementById('dividend').value = dividend;
-  document.getElementById('divisor').value  = divisor;
+  if (mode === 'practice') {
+    document.getElementById('dividendP').value = dividend;
+    document.getElementById('divisorP').value  = divisor;
+  } else {
+    document.getElementById('dividend').value = dividend;
+    document.getElementById('divisor').value  = divisor;
+  }
   startDivision();
 }
 
